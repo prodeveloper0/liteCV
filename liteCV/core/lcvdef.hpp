@@ -2,6 +2,7 @@
 #ifndef LCV_CORE_LCVDEF_HPP
 #define LCV_CORE_LCVDEF_HPP
 #include <stdint.h>
+#include <assert.h>
 
 // OpenCV's premitive types
 using uchar = uint8_t;

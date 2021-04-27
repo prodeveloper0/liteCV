@@ -53,6 +53,12 @@ namespace lcv
             refcount = nullptr;
         }
 
+        void inline deep_copy(const Matrix& other)
+        {
+            create(other.cols, other.rows, other.type.nchans, other.type.depth);
+            memmove(data, other.data, other.cols * other.rows * other.elemSize()); // CAUTION SELF REFERENCE
+        }
+
         void inline swallow_copy(const Matrix& other, bool must_be_released)
         {
             if (must_be_released)
@@ -90,13 +96,13 @@ namespace lcv
 
         Matrix(const Matrix& other)
         {
-            // Copy initializer
+            // Copying initializer
             swallow_copy(other, false);
         }
 
         Matrix(Matrix&& other) noexcept
         {
-            // Move initializer
+            // Moving initializer
             swallow_move(std::move(other), false);
         }
 
@@ -109,26 +115,39 @@ namespace lcv
     public:
         Matrix& operator=(const Matrix& other)
         {
-            // Copy operator
+            // Copying by '=' operator
             swallow_copy(other, true);
             return *this;
         }
 
         Matrix& operator=(Matrix&& other) noexcept
         {
-            // Move operator
+            // Moving by '=' operator
             swallow_move(std::move(other), true);
             return *this;
         }
 
-    public:
-        void create(int cols, int rows, const std::string channels = "8uc3")
+        template<typename Element>
+        Matrix& operator=(const Element& value)
         {
-            // Parse channels string
-            int nchans, depth;
-            parse_channels(channels, nchans, depth);
+            // setTo by '=' operator
+            setTo(value);
+            return *this;
+        }
 
-            // Allocate memory
+    public:
+        static Matrix zeros(int cols, int rows, const std::string channels = "8uc3")
+        {
+            Matrix m(cols, rows, channels);
+            memset(m.ptr(), 0, cols * rows * ((int)m.type.depth / 8) * m.type.nchans);
+            return m;
+        }
+
+    private:
+        // ONLY USES FOR CREATE MATRIX IN THE CLASS
+        void create(int cols, int rows, int nchans, int depth)
+        {
+            // Allocate memory first
             byte* data;
             if ((data = (byte*)malloc(cols * rows * nchans * depth)) == NULL)
                 throw std::bad_exception();
@@ -144,6 +163,52 @@ namespace lcv
         }
 
     public:
+        void create(int cols, int rows, const std::string channels = "8uc3")
+        {
+            // Parse channels string
+            int nchans, depth;
+            parse_channels(channels, nchans, depth);
+
+            // Create matrix by premitives
+            create(cols, rows, nchans, depth);
+        }
+
+        template<typename Element>
+        void setTo(const Element& value)
+        {
+            // The size of value and matrix's element size must be same
+            assert(sizeof(value) == elemSize());
+
+            // Set all elements to single value
+            for (int i = 0; i < cols * rows; ++i)
+                ptr<Element>()[i] = value;
+        }
+
+        void copyTo(Matrix& matrix) const
+        {
+            Matrix m;
+            m.deep_copy(*this);
+            matrix = m;
+        }
+
+        Matrix clone() const
+        {
+            Matrix m;
+            copyTo(m);
+            return m;
+        }
+
+    public:
+        size_t elemSize() const
+        {
+            return (int)(type.depth * type.nchans) / 8;
+        }
+
+        size_t elemSize1() const
+        {
+            return (int)type.depth / 8;
+        }
+
         byte* ptr()
         {
             return this->data;
@@ -156,12 +221,12 @@ namespace lcv
 
         byte* ptr(int y)
         {
-            return &this->data[y * cols * ((int)type.depth / 8) * type.nchans];
+            return &this->data[y * cols * elemSize()];
         }
 
         const byte* cptr(int y) const
         {
-            return &this->data[y * cols * ((int)type.depth / 8) * type.nchans];
+            return &this->data[y * cols * elemSize()];
         }
 
         template<typename Element>

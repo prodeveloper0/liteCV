@@ -1,7 +1,6 @@
 #pragma once
 #ifndef LCV_CORE_ELEMENT_HPP
 #define LCV_CORE_ELEMENT_HPP
-#include <cassert>
 #include "lcvdef.hpp"
 #include "prototypes.hpp"
 
@@ -118,10 +117,5 @@ namespace lcv
 	using Vec2d = Vec<float64, 2>;
 	using Vec3d = Vec<float64, 3>;
 	using Vec4d = Vec<float64, 4>;
-
-	// cv::Scalar
-	template<typename Type>
-	using Scalar_ = Element_<Type, 4>;
-	using Scalar = Scalar_<float64>;
 } // namespace lcv
 #endif // LCV_CORE_ELEMENT_HPP
