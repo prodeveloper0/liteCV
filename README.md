@@ -5,11 +5,15 @@ Unlike _OpenCV_, **_liteCV_** must be **INDEPENDENCE**.
 
 # Achievements
 The main achievement of *_liteCV_* is providing equivalence with OpenCV.  
-Especially, we are focusing implementing OpenCV's `core`, `imgproc` and `imgcodec`.
+Especially, we are focusing implementing OpenCV's `core`, `imgcodec`, `imgproc` and `highgui`.
 
-## Data Structure
+## Data Structure (`core`)
 1. Element (equivalent to `cv::Vec`/`cv::Scalar`)
 2. Size (equivalent to `cv::Size`)
 3. Point (equivalent to `cv::Point`)
 4. Rect (equivalent to `cv::Rect`)
 5. Matrix (equivalent to `cv::Mat`)
+
+## Image I/O (`imgcodec`)
+1. Read Image From File (equivalent to `cv::imread`)
+2. Write Image To File (equivalent to `cv::imwrite`)
