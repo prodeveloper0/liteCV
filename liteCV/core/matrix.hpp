@@ -103,7 +103,7 @@ namespace lcv
         Matrix(Matrix&& other) noexcept
         {
             // Moving initializer
-            swallow_move(std::move(other), false);
+            swallow_move(std::forward<Matrix>(other), false);
         }
 
         Matrix(int cols, int rows, const std::string channels = "8uc3")
@@ -123,7 +123,7 @@ namespace lcv
         Matrix& operator=(Matrix&& other) noexcept
         {
             // Moving by '=' operator
-            swallow_move(std::move(other), true);
+            swallow_move(std::forward<Matrix>(other), true);
             return *this;
         }
 
@@ -199,6 +199,11 @@ namespace lcv
         }
 
     public:
+        bool empty() const
+        {
+            return data == NULL;
+        }
+
         size_t elemSize() const
         {
             return (int)(type.depth * type.nchans) / 8;
