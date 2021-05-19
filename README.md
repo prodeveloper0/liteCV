@@ -15,5 +15,5 @@ Especially, we are focusing implementing OpenCV's `core`, `imgcodec`, `imgproc` 
 5. Matrix (equivalent to `cv::Mat`)
 
 ## Image I/O (`imgcodec`)
-1. Read Image From File (equivalent to `cv::imread`)
-2. Write Image To File (equivalent to `cv::imwrite`)
+1. Image Reading/Writing (equivalent to `cv::imread`/`cv::imwrite`)
+2. Image Encoding/Decoding (equivalent to `cv::imencode`/`cv::imdecode`)
