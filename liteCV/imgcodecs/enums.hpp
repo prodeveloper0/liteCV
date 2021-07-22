@@ -12,6 +12,6 @@ namespace lcv
         IMREAD_COLOR = 1,
         IMREAD_ANYDEPTH = 2,
         IMREAD_ANYCOLOR = 4
-    };
+    }; // enum ImReadModes
 } // namespace lcv
 #endif // LCV_IMGCODECS_ENUMS_HPP
