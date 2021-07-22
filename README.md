@@ -17,3 +17,6 @@ Especially, we are focusing implementing OpenCV's `core`, `imgcodec`, `imgproc` 
 ## Image I/O (`imgcodec`)
 1. Image Reading/Writing (equivalent to `cv::imread`/`cv::imwrite`)
 2. Image Encoding/Decoding (equivalent to `cv::imencode`/`cv::imdecode`)
+
+## Image Processing (`imgproc`)
+1. Color Conversion (equivalent to `cv::cvtColor`)
