@@ -25,15 +25,30 @@ namespace lcv
         stbi_uc* data;
         int width, height, channels;
 
+        // Convert image mode `flag` to stbi_load's `req_comp`
+        int req_comp;
+        if (flag == IMREAD_COLOR)
+        {
+            req_comp = 3;
+        }
+        else if (flag == IMREAD_GRAYSCALE)
+        {
+            req_comp = 1;
+        }
+        else
+        {
+            // IMREAD_ANYCOLOR, IMREAD_ANYDEPTH, IMREAD_UNCHANGED are not supported yet :(
+            req_comp = 0;   // Unsupport flag
+        }
+
         // Load image from file using stb_image
-        // `flag` is not used yet :(
-        data = stbi_load(filename.c_str(), &width, &height, &channels, 3);
+        data = stbi_load(filename.c_str(), &width, &height, &channels, req_comp);
         if (data == NULL)
             goto ret;
 
         // Copy from buffer
-        img.create(width, height);
-        memcpy(img.ptr(), data, (size_t)width * height * 3);
+        img.create(width, height, std::string("8uc") + std::to_string(req_comp));
+        memcpy(img.ptr(), data, (size_t)width * height * req_comp);
         stbi_image_free(data);
 
         ret:
@@ -73,15 +88,30 @@ namespace lcv
         stbi_uc* data;
         int width, height, channels;
 
+        // Convert image mode `flag` to stbi_load's `req_comp`
+        int req_comp;
+        if (flag == IMREAD_COLOR)
+        {
+            req_comp = 3;
+        }
+        else if (flag == IMREAD_GRAYSCALE)
+        {
+            req_comp = 1;
+        }
+        else
+        {
+            // IMREAD_ANYCOLOR, IMREAD_ANYDEPTH, IMREAD_UNCHANGED are not supported yet :(
+            req_comp = 0;   // Unsupport flag
+        }
+
         // Decode image from buffer using stb_image
-        // `flag` is not used yet :(
-        data = stbi_load_from_memory(&buffer[0], (int)buffer.size(), &width, &height, &channels, 3);
+        data = stbi_load_from_memory(&buffer[0], (int)buffer.size(), &width, &height, &channels, req_comp);
         if (data == NULL)
             goto ret;
 
         // Copy from buffer
-        img.create(width, height);
-        memcpy(img.ptr(), data, (size_t)width * height * 3);
+        img.create(width, height, std::string("8uc") + std::to_string(req_comp));
+        memcpy(img.ptr(), data, (size_t)width * height * req_comp);
         stbi_image_free(data);
 
         ret:
