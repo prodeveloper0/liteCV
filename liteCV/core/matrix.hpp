@@ -6,6 +6,7 @@
 
 #include "lcvdef.hpp"
 #include "matrix.factory.hpp"
+#include "rect.hpp"
 
 namespace lcv
 {
@@ -13,12 +14,23 @@ namespace lcv
     {
     public:
         int cols, rows;
+
         struct
         {
-            uint16_t nchans;
-            uint16_t depth;
+            int linestep;
+            int elemstep;
+        } step;
+
+        struct
+        {
+            int depth;
+            int nchans;
         } type;
+
         byte* data;
+        byte* datastart;
+        byte* dataend;
+        byte* datalimit;
 
     private:
         std::atomic<unsigned long>* refcount;
@@ -48,15 +60,29 @@ namespace lcv
     private:
         void init()
         {
-            cols = rows = type.nchans = type.depth = 0;
-            data = NULL;
+            cols = rows = 0;
+            step.linestep = step.elemstep = 0;
+            type.nchans = type.depth = 0;
+            data = datastart = dataend = datalimit = NULL;
             refcount = nullptr;
         }
 
         void inline deep_copy(const Matrix& other)
         {
             create(other.cols, other.rows, other.type.nchans, other.type.depth);
-            memmove(data, other.data, other.cols * other.rows * other.elemSize()); // CAUTION SELF REFERENCE
+            if (!other.isSubmatrix())
+            {
+                // Just copying data fully
+                memcpy(data, other.data, step.linestep * rows);
+            }
+            else
+            {
+                // Copying data line by line
+                for (int y = 0;y < other.rows;++y)
+                {
+                    memcpy(ptr(y), other.ptr(y), step.linestep);
+                }
+            }
         }
 
         void inline swallow_copy(const Matrix& other, bool must_be_released)
@@ -65,22 +91,30 @@ namespace lcv
                 decref();
             this->cols = other.cols;
             this->rows = other.rows;
+            this->step = other.step;
             this->type = other.type;
             this->refcount = other.refcount;
             this->data = other.data;
+            this->datastart = other.datastart;
+            this->dataend = other.dataend;
+            this->datalimit = other.datalimit;
             incref();
         }
 
-        void inline swallow_move(Matrix&& other, bool must_be_released)
+        void inline swallow_copy(const Matrix& other, const Rect& roi, bool must_be_released)
         {
             if (must_be_released)
                 decref();
-            this->cols = other.cols;
-            this->rows = other.rows;
+            this->cols = roi.width;
+            this->rows = roi.height;
+            this->step = other.step;
             this->type = other.type;
             this->refcount = other.refcount;
-            this->data = other.data;
-            other.init();
+            this->data = (byte*)other.ptr(roi.y, roi.x);
+            this->datastart = other.datastart;
+            this->dataend = other.dataend;
+            this->datalimit = other.datalimit;
+            incref();
         }
 
     public:
@@ -96,18 +130,19 @@ namespace lcv
 
         Matrix(const Matrix& other)
         {
-            // Copying initializer
+            // Copying with initializer
             swallow_copy(other, false);
         }
 
-        Matrix(Matrix&& other) noexcept
+        Matrix(const Matrix& other, const Rect& roi)
         {
-            // Moving initializer
-            swallow_move(std::forward<Matrix>(other), false);
+            // Copying with ROI with initializer
+            swallow_copy(other, roi, false);
         }
 
         Matrix(int cols, int rows, const std::string channels = "8uc3")
         {
+            // Creating with initializer
             init();
             create(cols, rows, channels);
         }
@@ -120,11 +155,12 @@ namespace lcv
             return *this;
         }
 
-        Matrix& operator=(Matrix&& other) noexcept
+        Matrix operator()(const Rect& roi) const
         {
-            // Moving by '=' operator
-            swallow_move(std::forward<Matrix>(other), true);
-            return *this;
+            // Copying with ROI by '()' operator
+            Matrix sub_matrix;
+            sub_matrix.swallow_copy(*this, roi, false);
+            return sub_matrix;
         }
 
         template<typename Element>
@@ -148,17 +184,24 @@ namespace lcv
         void create(int cols, int rows, int nchans, int depth)
         {
             // Allocate memory first
-            byte* data;
-            if ((data = (byte*)malloc(cols * rows * nchans * depth)) == NULL)
+            byte* datastart;
+            byte* dataend;
+            if ((datastart = (byte*)malloc(cols * rows * nchans * depth)) == NULL)
                 throw std::bad_exception();
+            dataend = datastart + (cols * rows * nchans * depth);
 
             // Update attributes
             decref();
             this->cols = cols;
             this->rows = rows;
-            this->type.nchans = (uint16_t)nchans;
-            this->type.depth = (uint16_t)depth;
-            this->data = data;
+            this->step.elemstep = (int)(depth * nchans) / 8;
+            this->step.linestep = cols * step.elemstep;
+            this->type.nchans = nchans;
+            this->type.depth = depth;
+            this->datastart = datastart;
+            this->dataend = dataend;
+            this->datalimit = datalimit;
+            this->data = datastart;
             incref();
         }
 
@@ -214,61 +257,93 @@ namespace lcv
             return (int)type.depth / 8;
         }
 
-        byte* ptr()
+        bool isSubmatrix() const
         {
-            return this->data;
+            // Is it correct?
+            // Why OpenCV uses that by using (cv::Mat::flags & SUBMATRIX_FLAG)?
+            return data != datastart;
         }
 
-        const byte* cptr() const
+    public:
+        byte* ptr(int y=0)
         {
-            return this->data;
+            return data + (step.linestep * y);
         }
 
-        byte* ptr(int y)
+        const byte* ptr(int y=0) const
         {
-            return &this->data[y * cols * elemSize()];
+            return data + (step.linestep * y);
         }
 
-        const byte* cptr(int y) const
+        byte* ptr(int y, int x)
         {
-            return &this->data[y * cols * elemSize()];
+            return data + (step.linestep * y) + (step.elemstep * x);
         }
 
-        template<typename Element>
-        Element* ptr()
+        const byte* ptr(int y, int x) const
         {
-            return (Element*)this->data;
-        }
-
-        template<typename Element>
-        Element* cptr() const
-        {
-            return (Element*)this->data;
+            return data + (step.linestep * y) + (step.elemstep * x);
         }
 
         template<typename Element>
-        Element* ptr(int y)
+        Element* ptr(int y=0)
         {
-            return &(((Element*)this->data)[y * cols]);
+            return (Element*)ptr(y);
         }
 
         template<typename Element>
-        Element* cptr(int y) const
+        const Element* ptr(int y=0) const
         {
-            return &(((Element*)this->data)[y * cols]);
+            return (Element*)ptr(y);
+        }
+
+        template<typename Element>
+        Element* ptr(int y, int x)
+        {
+            return (Element*)ptr(y, x);
+        }
+
+        template<typename Element>
+        const Element* ptr(int y, int x) const
+        {
+            return (Element*)ptr(y, x);
         }
 
     public:
         template<typename Element>
         Element& at(int y)
         {
-            ((Element*)this->data)[y * cols];
+            return *ptr<Element>(y);
+        }
+
+        template<typename Element>
+        const Element& at(int y) const
+        {
+            return *ptr<Element>(y);
         }
 
         template<typename Element>
         Element& at(int y, int x)
         {
-            return ((Element*)this->data)[y * cols + x];
+            return *ptr<Element>(y, x);
+        }
+
+        template<typename Element>
+        const Element& at(int y, int x) const
+        {
+            return *ptr<Element>(y, x);
+        }
+
+        template<typename Element>
+        Element& at(Point pt)
+        {
+            return at<Element>(pt.y, pt.x);
+        }
+
+        template<typename Element>
+        const Element& at(Point pt) const
+        {
+            return at<Element>(pt.y, pt.x);
         }
     }; // class Matrix
 
