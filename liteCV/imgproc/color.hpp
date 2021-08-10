@@ -24,7 +24,7 @@ namespace lcv
         //#pragma omp parallel for num_threads(4)
         for (int y = 0;y < src.rows;++y)
         {
-            const Vec3b* src_stride = (Vec3b*)src.cptr(y);
+            const Vec3b* src_stride = (Vec3b*)src.ptr(y);
             byte* dst_stride = dst_image.ptr(y);
             
             for (int x = 0;x < src.cols;++x)
@@ -45,7 +45,7 @@ namespace lcv
         //#pragma omp parallel for num_threads(4)
         for (int y = 0;y < src.rows;++y)
         {
-            const byte* src_stride = src.cptr(y);
+            const byte* src_stride = src.ptr(y);
             Vec3b* dst_stride = (Vec3b*)dst_image.ptr(y);
 
             for (int x = 0;x < src.cols;++x)
@@ -68,7 +68,7 @@ namespace lcv
         //#pragma omp parallel for num_threads(4)
         for (int y = 0;y < src.rows;++y)
         {
-            const Vec3b* src_stride = (Vec3b*)src.cptr(y);
+            const Vec3b* src_stride = (Vec3b*)src.ptr(y);
             Vec3b* dst_stride = (Vec3b*)dst_image.ptr(y);
 
             for (int x = 0;x < src.cols;++x)

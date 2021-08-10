@@ -8,6 +8,7 @@
 
 #include "liteCV/core/lcvdef.hpp"
 #include "liteCV/core/matrix.hpp"
+#include "liteCV/imgproc/color.hpp"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb/stb_image.h"
@@ -52,6 +53,8 @@ namespace lcv
         stbi_image_free(data);
 
         ret:
+        if (req_comp)
+            cvtColor(img, img, COLOR_RGB2BGR);
         return img;
     }
 
@@ -68,15 +71,15 @@ namespace lcv
         // `params` is not used yet :(
         if (extension == ".bmp")
         {
-            return stbi_write_bmp(filename.c_str(), img.cols, img.rows, img.type.nchans, img.cptr()) != 0;
+            return stbi_write_bmp(filename.c_str(), img.cols, img.rows, img.type.nchans, img.ptr()) != 0;
         }
         else if (extension == ".jpg" || extension == ".jpeg")
         {
-            return stbi_write_jpg(filename.c_str(), img.cols, img.rows, img.type.nchans, img.cptr(), 95) != 0;
+            return stbi_write_jpg(filename.c_str(), img.cols, img.rows, img.type.nchans, img.ptr(), 95) != 0;
         }
         else if (extension == ".png")
         {
-            return stbi_write_png(filename.c_str(), img.cols, img.rows, img.type.nchans, img.cptr(), img.cols * img.type.nchans) != 0;
+            return stbi_write_png(filename.c_str(), img.cols, img.rows, img.type.nchans, img.ptr(), img.cols * img.type.nchans) != 0;
         }
         
         return false;
@@ -140,17 +143,17 @@ namespace lcv
         // `params` is not used yet :(
         if (extension == ".bmp")
         {
-            if (stbi_write_bmp_to_func(writer_functor, &encoded_buffer, img.cols, img.rows, img.type.nchans, img.cptr()) != 0)
+            if (stbi_write_bmp_to_func(writer_functor, &encoded_buffer, img.cols, img.rows, img.type.nchans, img.ptr()) != 0)
                 goto success_ret;
         }
         else if (extension == ".jpg" || extension == ".jpeg")
         {
-            if (stbi_write_jpg_to_func(writer_functor, &encoded_buffer, img.cols, img.rows, img.type.nchans, img.cptr(), 95) != 0)
+            if (stbi_write_jpg_to_func(writer_functor, &encoded_buffer, img.cols, img.rows, img.type.nchans, img.ptr(), 95) != 0)
                 goto success_ret;
         }
         else if (extension == ".png")
         {
-            if (stbi_write_png_to_func(writer_functor, &encoded_buffer, img.cols, img.rows, img.type.nchans, img.cptr(), img.cols * img.type.nchans) != 0)
+            if (stbi_write_png_to_func(writer_functor, &encoded_buffer, img.cols, img.rows, img.type.nchans, img.ptr(), img.cols * img.type.nchans) != 0)
                 goto success_ret;
         }
 
