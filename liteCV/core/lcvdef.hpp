@@ -10,6 +10,33 @@ using ushort = uint16_t;
 
 namespace lcv
 {
+    // Utility Classes
+    class MovableOnly
+    {
+    public:
+        MovableOnly() = default;
+
+    private:
+        MovableOnly(const MovableOnly&) = delete;
+        MovableOnly& operator=(const MovableOnly&) = delete;
+    }; // class MovableOnly
+
+    class CopyableOnly
+    {
+    public:
+        CopyableOnly() = default;
+
+    private:
+        CopyableOnly(CopyableOnly&&) = delete;
+        CopyableOnly& operator=(CopyableOnly&&) = delete;
+    }; // class CopyableOnly
+
+    class Noncopyable : MovableOnly, CopyableOnly
+    {
+    public:
+        Noncopyable() = default;
+    }; // class Noncopyable
+
     // Premitive types
     using byte = uint8_t;
     using int8 = int8_t;

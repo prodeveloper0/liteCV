@@ -20,3 +20,7 @@ Especially, we are focusing implementing OpenCV's `core`, `imgcodec`, `imgproc` 
 
 ## Image Processing (`imgproc`)
 1. Color Conversion (equivalent to `cv::cvtColor`)
+
+## High-level GUI
+1. Display Image (equivalent to `cv::imshow`/`cv::namedWindow`)
+2. Keyboad Input (equivalent to `cv::waitKey`)
