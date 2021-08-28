@@ -1,6 +1,6 @@
 #pragma once
-#ifndef LCV_HIGHGUI_DIB_WIN32_HPP
-#define LCV_HIGHGUI_DIB_WIN32_HPP
+#ifndef LCV_HIGHGUI_WIN32_DIB_HPP
+#define LCV_HIGHGUI_WIN32_DIB_HPP
 
 #ifndef _WINDOWS_
 #define WIN32_LEAN_AND_MEAN
@@ -9,6 +9,7 @@
 
 #include "liteCV/core/lcvdef.hpp"
 #include "liteCV/core/matrix.hpp"
+
 
 namespace lcv
 {
@@ -176,6 +177,6 @@ namespace lcv
         {
             ::SetDIBitsToDevice(hdc, 0, 0, Width(), Height(), 0, 0, 0, Height(), pdata, pbmi, Bpp() != 8 ? DIB_RGB_COLORS : DIB_PAL_COLORS);
         }
-    };
+    }; // class DIB
 } // namespace lcv
-#endif // LCV_HIGHGUI_DIB_WIN32_HPP
+#endif // LCV_HIGHGUI_WIN32_DIB_HPP

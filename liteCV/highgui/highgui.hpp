@@ -1,16 +1,17 @@
 #pragma once
-#ifndef LCV_HIGHGUI_HIGHGUI_HPP
-#define LCV_HIGHGUI_HIGHGUI_HPP
+#ifndef LCV_HIGHGUI_HPP
+#define LCV_HIGHGUI_HPP
 #include <string>
 
 #include "liteCV/core/matrix.hpp"
 #include "flags.hpp"
 #ifdef _WIN32
 // Only support Windows yet.
-#include "winman.win32.hpp"
+#include "win32/winman_win32.hpp"
 #else
 #error "highgui cannot recognize platform"
 #endif // _WIN32
+
 
 namespace lcv
 {
@@ -45,4 +46,4 @@ namespace lcv
 		return km.keyboad.keycode;
 	}
 } // namespace lcv
-#endif // LCV_HIGHGUI_HIGHGUI_HPP
+#endif // LCV_HIGHGUI_HPP

@@ -1,6 +1,6 @@
 #pragma once
-#ifndef LCV_HIGHGUI_WINMAN_WIN32_HPP
-#define LCV_HIGHGUI_WINMAN_WIN32_HPP
+#ifndef LCV_HIGHGUI_WIN32_WINMAN_HPP
+#define LCV_HIGHGUI_WIN32_WINMAN_HPP
 #include <string>
 #include <map>
 #include <list>
@@ -10,10 +10,11 @@
 
 #include "liteCV/core/lcvdef.hpp"
 #include "liteCV/core/matrix.hpp"
-#include "dib.win32.hpp"
 
-#include "flags.hpp"
-#include "winman.hpp"
+#include "../flags.hpp"
+#include "../winman.hpp"
+#include "dib.hpp"
+
 
 namespace lcv
 {
@@ -128,18 +129,18 @@ namespace lcv
             Destroy();
         }
 
-        WindowWin32(WindowWin32&& other) noexcept
+        WindowWin32(WindowWin32&& another) noexcept
         {
             Destroy();
-            hwnd = other.hwnd;
-            other.hwnd = 0;
+            hwnd = another.hwnd;
+            another.hwnd = 0;
         }
 
-        WindowWin32& operator=(WindowWin32&& other) noexcept
+        WindowWin32& operator=(WindowWin32&& another) noexcept
         {
             Destroy();
-            hwnd = other.hwnd;
-            other.hwnd = 0;
+            hwnd = another.hwnd;
+            another.hwnd = 0;
             return *this;
         }
 
@@ -289,4 +290,4 @@ namespace lcv
     using Window = WindowWin32;
     using WindowManager = WindowManager_<Event, Window>;
 } // namespace lcv
-#endif // LCV_HIGHGUI_WINMAN_WIN32_HPP
+#endif // LCV_HIGHGUI_WIN32_WINMAN_HPP

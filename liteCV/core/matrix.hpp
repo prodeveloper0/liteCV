@@ -3,13 +3,273 @@
 #define LCV_CORE_MATRIX_HPP
 #include <string>
 #include <atomic>
+#include <regex>
 
 #include "lcvdef.hpp"
-#include "matrix.factory.hpp"
-#include "rect.hpp"
+#include "types.hpp"
+
+
+#define LCV_8U      (lcv::ConstMatrixType<8, 0, lcv::MatrixType::UNSIGNED_INTEGER_NUMBER>().constant.packed.value)
+#define LCV_8UC1    (lcv::ConstMatrixType<8, 1, lcv::MatrixType::UNSIGNED_INTEGER_NUMBER>().constant.packed.value)
+#define LCV_8UC2    (lcv::ConstMatrixType<8, 2, lcv::MatrixType::UNSIGNED_INTEGER_NUMBER>().constant.packed.value)
+#define LCV_8UC3    (lcv::ConstMatrixType<8, 3, lcv::MatrixType::UNSIGNED_INTEGER_NUMBER>().constant.packed.value)
+#define LCV_8UC4    (lcv::ConstMatrixType<8, 4, lcv::MatrixType::UNSIGNED_INTEGER_NUMBER>().constant.packed.value)
+#define LCV_8S      (lcv::ConstMatrixType<8, 0, lcv::MatrixType::SIGNED_INTEGER_NUMBER>().constant.packed.value)
+#define LCV_8SC1    (lcv::ConstMatrixType<8, 1, lcv::MatrixType::SIGNED_INTEGER_NUMBER>().constant.packed.value)
+#define LCV_8SC2    (lcv::ConstMatrixType<8, 2, lcv::MatrixType::SIGNED_INTEGER_NUMBER>().constant.packed.value)
+#define LCV_8SC3    (lcv::ConstMatrixType<8, 3, lcv::MatrixType::SIGNED_INTEGER_NUMBER>().constant.packed.value)
+#define LCV_8SC4    (lcv::ConstMatrixType<8, 4, lcv::MatrixType::SIGNED_INTEGER_NUMBER>().constant.packed.value)
+#define LCV_16U     (lcv::ConstMatrixType<16, 0, lcv::MatrixType::UNSIGNED_INTEGER_NUMBER>().constant.packed.value)
+#define LCV_16UC1   (lcv::ConstMatrixType<16, 1, lcv::MatrixType::UNSIGNED_INTEGER_NUMBER>().constant.packed.value)
+#define LCV_16UC2   (lcv::ConstMatrixType<16, 2, lcv::MatrixType::UNSIGNED_INTEGER_NUMBER>().constant.packed.value)
+#define LCV_16UC3   (lcv::ConstMatrixType<16, 3, lcv::MatrixType::UNSIGNED_INTEGER_NUMBER>().constant.packed.value)
+#define LCV_16UC4   (lcv::ConstMatrixType<16, 4, lcv::MatrixType::UNSIGNED_INTEGER_NUMBER>().constant.packed.value)
+#define LCV_16S     (lcv::ConstMatrixType<16, 0, lcv::MatrixType::SIGNED_INTEGER_NUMBER>().constant.packed.value)
+#define LCV_16SC1   (lcv::ConstMatrixType<16, 1, lcv::MatrixType::SIGNED_INTEGER_NUMBER>().constant.packed.value)
+#define LCV_16SC2   (lcv::ConstMatrixType<16, 2, lcv::MatrixType::SIGNED_INTEGER_NUMBER>().constant.packed.value)
+#define LCV_16SC3   (lcv::ConstMatrixType<16, 3, lcv::MatrixType::SIGNED_INTEGER_NUMBER>().constant.packed.value)
+#define LCV_16SC4   (lcv::ConstMatrixType<16, 4, lcv::MatrixType::SIGNED_INTEGER_NUMBER>().constant.packed.value)
+#define LCV_32U     (lcv::ConstMatrixType<32, 0, lcv::MatrixType::UNSIGNED_INTEGER_NUMBER>().constant.packed.value)
+#define LCV_32UC1   (lcv::ConstMatrixType<32, 1, lcv::MatrixType::UNSIGNED_INTEGER_NUMBER>().constant.packed.value)
+#define LCV_32UC2   (lcv::ConstMatrixType<32, 2, lcv::MatrixType::UNSIGNED_INTEGER_NUMBER>().constant.packed.value)
+#define LCV_32UC3   (lcv::ConstMatrixType<32, 3, lcv::MatrixType::UNSIGNED_INTEGER_NUMBER>().constant.packed.value)
+#define LCV_32UC4   (lcv::ConstMatrixType<32, 4, lcv::MatrixType::UNSIGNED_INTEGER_NUMBER>().constant.packed.value)
+#define LCV_32S     (lcv::ConstMatrixType<32, 0, lcv::MatrixType::SIGNED_INTEGER_NUMBER>().constant.packed.value)
+#define LCV_32SC1   (lcv::ConstMatrixType<32, 1, lcv::MatrixType::SIGNED_INTEGER_NUMBER>().constant.packed.value)
+#define LCV_32SC2   (lcv::ConstMatrixType<32, 2, lcv::MatrixType::SIGNED_INTEGER_NUMBER>().constant.packed.value)
+#define LCV_32SC3   (lcv::ConstMatrixType<32, 3, lcv::MatrixType::SIGNED_INTEGER_NUMBER>().constant.packed.value)
+#define LCV_32SC4   (lcv::ConstMatrixType<32, 4, lcv::MatrixType::SIGNED_INTEGER_NUMBER>().constant.packed.value)
+#define LCV_32F     (lcv::ConstMatrixType<32, 0, lcv::MatrixType::REAL_NUMBER>().constant.packed.value)
+#define LCV_32FC1   (lcv::ConstMatrixType<32, 1, lcv::MatrixType::REAL_NUMBER>().constant.packed.value)
+#define LCV_32FC2   (lcv::ConstMatrixType<32, 2, lcv::MatrixType::REAL_NUMBER>().constant.packed.value)
+#define LCV_32FC3   (lcv::ConstMatrixType<32, 3, lcv::MatrixType::REAL_NUMBER>().constant.packed.value)
+#define LCV_32FC4   (lcv::ConstMatrixType<32, 4, lcv::MatrixType::REAL_NUMBER>().constant.packed.value)
+#define LCV_64F     (lcv::ConstMatrixType<64, 0, lcv::MatrixType::REAL_NUMBER>().constant.packed.value)
+#define LCV_64FC1   (lcv::ConstMatrixType<64, 1, lcv::MatrixType::REAL_NUMBER>().constant.packed.value)
+#define LCV_64FC2   (lcv::ConstMatrixType<64, 2, lcv::MatrixType::REAL_NUMBER>().constant.packed.value)
+#define LCV_64FC3   (lcv::ConstMatrixType<64, 3, lcv::MatrixType::REAL_NUMBER>().constant.packed.value)
+#define LCV_64FC4   (lcv::ConstMatrixType<64, 4, lcv::MatrixType::REAL_NUMBER>().constant.packed.value)
+
 
 namespace lcv
 {
+    struct MatrixType
+    {
+        const static uint8_t INVALID_NUMBER = 0b00;
+        const static uint8_t SIGNED_INTEGER_NUMBER = 0b01;
+        const static uint8_t UNSIGNED_INTEGER_NUMBER = 0b10;
+        const static uint8_t REAL_NUMBER = 0b11;
+
+        static int find_ntype(int bits, char typec)
+        {
+            if (typec == 's')
+                return SIGNED_INTEGER_NUMBER;
+            else if (typec == 'u')
+                return UNSIGNED_INTEGER_NUMBER;
+            else if (typec == 'f')
+                return REAL_NUMBER;
+            return INVALID_NUMBER;
+        }
+
+        static std::string find_dtype(int bits, char typec_or_ntype)
+        {
+            if (bits == 8 && (typec_or_ntype == 'u' || typec_or_ntype == UNSIGNED_INTEGER_NUMBER))
+                return "uint8";
+            else if (bits == 8 && (typec_or_ntype == 'i' || typec_or_ntype == SIGNED_INTEGER_NUMBER))
+                return "int8";
+            else if (bits == 16 && (typec_or_ntype == 'u' || typec_or_ntype == UNSIGNED_INTEGER_NUMBER))
+                return "uint16";
+            else if (bits == 16 && (typec_or_ntype == 'i' || typec_or_ntype == SIGNED_INTEGER_NUMBER))
+                return "int16";
+            else if (bits == 32 && (typec_or_ntype == 'u' || typec_or_ntype == UNSIGNED_INTEGER_NUMBER))
+                return "uint32";
+            else if (bits == 32 && (typec_or_ntype == 'i' || typec_or_ntype == SIGNED_INTEGER_NUMBER))
+                return "int32";
+            else if (bits == 32 && (typec_or_ntype == 'f' || typec_or_ntype == REAL_NUMBER))
+                return "float32";
+            else if (bits == 64 && (typec_or_ntype == 'f' || typec_or_ntype == REAL_NUMBER))
+                return "float64";
+            return "nat";
+        }
+
+        static void from_dtype(const std::string& dtype, int& bits, int& ntype)
+        {
+            if (dtype == "uint8")
+            {
+                bits = 8;
+                ntype = UNSIGNED_INTEGER_NUMBER;
+            }
+            else if (dtype == "int8")
+            {
+                bits = 8;
+                ntype = SIGNED_INTEGER_NUMBER;
+            }
+            else if (dtype == "uint16")
+            {
+                bits = 16;
+                ntype = UNSIGNED_INTEGER_NUMBER;
+            }
+            else if (dtype == "int16")
+            {
+                bits = 16;
+                ntype = SIGNED_INTEGER_NUMBER;
+            }
+            else if (dtype == "uint32")
+            {
+                bits = 32;
+                ntype = UNSIGNED_INTEGER_NUMBER;
+            }
+            else if (dtype == "int32")
+            {
+                bits = 32;
+                ntype = SIGNED_INTEGER_NUMBER;
+            }
+            else if (dtype == "float32")
+            {
+                bits = 32;
+                ntype = REAL_NUMBER;
+            }
+            else if (dtype == "float64")
+            {
+                bits = 64;
+                ntype = REAL_NUMBER;
+            }
+            else
+            {
+                bits = 0;
+                ntype = INVALID_NUMBER;
+            }
+
+            assert(bits > 0 && (bits & (bits - 1)) == 0);
+            assert(ntype != INVALID_NUMBER);
+        }
+
+        static void from_channel_string(const std::string& channel_string, int& channels, int& bits, int& ntype)
+        {
+            std::regex re("(\\d+)([f|i|u])c(\\d+)");
+            std::smatch match;
+            if (std::regex_match(channel_string, match, re))
+            {
+                std::string _dtype;
+                int _channels, _bits, _ntype;
+
+                _bits = std::stoi(match[1]);
+                _channels = std::stoi(match[3]);
+                _ntype = find_ntype(_bits, match[2].str()[0]);
+
+                assert(_bits > 0 && !(_bits & (_bits - 1)));	
+                assert(_channels > 0);	
+                assert(_ntype != INVALID_NUMBER);
+
+                channels = _channels;
+                bits = _bits;
+                ntype = _ntype;
+            }
+        }
+
+        union
+        {
+            uint32_t value;
+            struct
+            {
+                uint32_t bits : 8;
+                uint32_t channels : 4;
+                uint32_t ntype : 2;
+            } fields;
+        } packed;
+
+        MatrixType(uint32_t value = 0)
+            : packed({ value }) {}
+
+        MatrixType(uint8_t bits, uint8_t channels, uint8_t ntype)
+            : packed({ 0 })
+        {
+            packed.fields.bits = bits;
+            packed.fields.channels = channels;
+            packed.fields.ntype = ntype;
+        }
+
+        MatrixType(int channels, const std::string& dtype)
+            : packed({ 0 })
+        {
+            int bits, ntype;
+            from_dtype(dtype, bits, ntype);
+
+            packed.fields.bits = bits;
+            packed.fields.channels = channels;
+            packed.fields.ntype = ntype;
+        }
+
+        explicit MatrixType(const std::string& channel_string)
+            : packed({ 0 })
+        {
+            int channels, bits, ntype;
+            from_channel_string(channel_string, channels, bits, ntype);
+
+            packed.fields.bits = bits;
+            packed.fields.channels = channels;
+            packed.fields.ntype = ntype;
+        }
+
+        MatrixType(const MatrixType& another)
+        {
+            packed.value = another.packed.value;
+        }
+
+        MatrixType& operator=(const MatrixType& another)
+        {
+            packed.value = another.packed.value;
+            return *this;
+        }
+
+        std::string dtype() const
+        {
+            return find_dtype(packed.fields.bits, packed.fields.ntype);
+        }
+
+        int channels() const // A number of channels
+        {
+            return packed.fields.channels;
+        }
+
+        uint32_t depth() const // Depth of element LCV_8U, LCV_8S, ...
+        {
+            MatrixType tmp(*this);
+            tmp.packed.fields.channels = 0;
+            return tmp.packed.value;
+        }
+
+        int bbp() const // Bit per pixel
+        {
+            return packed.fields.bits * packed.fields.channels;
+        }
+
+        bool has_sign() const // signed integer or real
+        {
+            return packed.fields.ntype == SIGNED_INTEGER_NUMBER || packed.fields.ntype == REAL_NUMBER;
+        }
+
+        bool is_integer() const // inter or not
+        {
+            return !(packed.fields.ntype == INVALID_NUMBER || packed.fields.ntype == REAL_NUMBER);
+        }
+
+        bool is_real() const // real or not
+        {
+            return !is_integer();
+        }
+    }; // struct MatrixType
+
+    template<int Bits, int Channels, int NType>
+    struct ConstMatrixType
+    {
+        MatrixType constant;
+
+        constexpr ConstMatrixType()
+            : constant({ Bits, Channels, NType })
+        {}
+    }; // struct ConstMatrixType
+
     class Matrix
     {
     public:
@@ -17,15 +277,11 @@ namespace lcv
 
         struct
         {
+            int pixelstep;
             int linestep;
-            int elemstep;
-        } step;
+        } step_info;
 
-        struct
-        {
-            int depth;
-            int nchans;
-        } type;
+        MatrixType type_info;
 
         byte* data;
         byte* datastart;
@@ -61,59 +317,60 @@ namespace lcv
         void init()
         {
             cols = rows = 0;
-            step.linestep = step.elemstep = 0;
-            type.nchans = type.depth = 0;
+            step_info.linestep = step_info.pixelstep = 0;
+            type_info.packed.value = 0;
             data = datastart = dataend = datalimit = NULL;
             refcount = nullptr;
         }
 
-        void inline deep_copy(const Matrix& other)
+        void inline deep_copy(const Matrix& another)
         {
-            create(other.cols, other.rows, other.type.nchans, other.type.depth);
-            if (!other.isSubmatrix())
+            create(another.cols, another.rows, another.type_info);
+
+            if (!another.isSubmatrix())
             {
                 // Just copying data fully
-                memcpy(data, other.data, step.linestep * rows);
+                memcpy(data, another.data, step_info.linestep * rows);
             }
             else
             {
                 // Copying data line by line
-                for (int y = 0;y < other.rows;++y)
+                for (int y = 0;y < another.rows;++y)
                 {
-                    memcpy(ptr(y), other.ptr(y), step.linestep);
+                    memcpy(ptr(y), another.ptr(y), step_info.linestep);
                 }
             }
         }
 
-        void inline swallow_copy(const Matrix& other, bool must_be_released)
+        void inline swallow_copy(const Matrix& another, bool must_be_released)
         {
             if (must_be_released)
                 decref();
-            this->cols = other.cols;
-            this->rows = other.rows;
-            this->step = other.step;
-            this->type = other.type;
-            this->refcount = other.refcount;
-            this->data = other.data;
-            this->datastart = other.datastart;
-            this->dataend = other.dataend;
-            this->datalimit = other.datalimit;
+            this->cols = another.cols;
+            this->rows = another.rows;
+            this->step_info = another.step_info;
+            this->type_info = another.type_info;
+            this->refcount = another.refcount;
+            this->data = another.data;
+            this->datastart = another.datastart;
+            this->dataend = another.dataend;
+            this->datalimit = another.datalimit;
             incref();
         }
 
-        void inline swallow_copy(const Matrix& other, const Rect& roi, bool must_be_released)
+        void inline swallow_copy(const Matrix& another, const Rect& roi, bool must_be_released)
         {
             if (must_be_released)
                 decref();
             this->cols = roi.width;
             this->rows = roi.height;
-            this->step = other.step;
-            this->type = other.type;
-            this->refcount = other.refcount;
-            this->data = (byte*)other.ptr(roi.y, roi.x);
-            this->datastart = other.datastart;
-            this->dataend = other.dataend;
-            this->datalimit = other.datalimit;
+            this->step_info = another.step_info;
+            this->type_info = another.type_info;
+            this->refcount = another.refcount;
+            this->data = (byte*)another.ptr(roi.y, roi.x);
+            this->datastart = another.datastart;
+            this->dataend = another.dataend;
+            this->datalimit = another.datalimit;
             incref();
         }
 
@@ -123,35 +380,52 @@ namespace lcv
             init();
         }
 
-        virtual ~Matrix() noexcept
+        ~Matrix() noexcept
         {
             decref();
         }
 
-        Matrix(const Matrix& other)
+        Matrix(const Matrix& another)
         {
             // Copying with initializer
-            swallow_copy(other, false);
+            swallow_copy(another, false);
         }
 
-        Matrix(const Matrix& other, const Rect& roi)
+        Matrix(const Matrix& another, const Rect& roi)
         {
             // Copying with ROI with initializer
-            swallow_copy(other, roi, false);
+            swallow_copy(another, roi, false);
         }
 
-        Matrix(int cols, int rows, const std::string channels = "8uc3")
+        explicit Matrix(int cols, int rows, uint32_t type)
         {
-            // Creating with initializer
             init();
-            create(cols, rows, channels);
+            create(cols, rows, type);
+        }
+
+        Matrix(int cols, int rows, const std::string& channel_string)
+        {
+            init();
+            create(cols, rows, channel_string);
+        }
+
+        explicit Matrix(int cols, int rows, int channels, uint32_t type_wo_channels)
+        {
+            init();
+            create(cols, rows, channels, type_wo_channels);
+        }
+
+        Matrix(int cols, int rows, int channels, const std::string& dtype)
+        {
+            init();
+            create(cols, rows, channels, dtype);
         }
 
     public:
-        Matrix& operator=(const Matrix& other)
+        Matrix& operator=(const Matrix& another)
         {
             // Copying by '=' operator
-            swallow_copy(other, true);
+            swallow_copy(another, true);
             return *this;
         }
 
@@ -171,33 +445,28 @@ namespace lcv
             return *this;
         }
 
-    public:
-        static Matrix zeros(int cols, int rows, const std::string channels = "8uc3")
-        {
-            Matrix m(cols, rows, channels);
-            memset(m.ptr(), 0, cols * rows * ((int)m.type.depth / 8) * m.type.nchans);
-            return m;
-        }
-
     private:
         // ONLY USES FOR CREATE MATRIX IN THE CLASS
-        void create(int cols, int rows, int nchans, int depth)
+        void create(int cols, int rows, const MatrixType& type_info)
         {
+            // Calculate size
+            int pixel_bytes = (int)type_info.bbp() / 8;
+            int scanline_bytes = cols * pixel_bytes;
+
             // Allocate memory first
             byte* datastart;
             byte* dataend;
-            if ((datastart = (byte*)malloc(cols * rows * nchans * depth)) == NULL)
+            if ((datastart = (byte*)malloc(rows * scanline_bytes)) == NULL)
                 throw std::bad_exception();
-            dataend = datastart + (cols * rows * nchans * depth);
+            dataend = datastart + (rows * scanline_bytes);
 
             // Update attributes
             decref();
             this->cols = cols;
             this->rows = rows;
-            this->step.elemstep = (int)(depth * nchans) / 8;
-            this->step.linestep = cols * step.elemstep;
-            this->type.nchans = nchans;
-            this->type.depth = depth;
+            this->step_info.pixelstep = pixel_bytes;
+            this->step_info.linestep = scanline_bytes;
+            this->type_info = type_info;
             this->datastart = datastart;
             this->dataend = dataend;
             this->datalimit = datalimit;
@@ -206,14 +475,59 @@ namespace lcv
         }
 
     public:
-        void create(int cols, int rows, const std::string channels = "8uc3")
+        static Matrix zeros(int cols, int rows, uint32_t type)
         {
-            // Parse channels string
-            int nchans, depth;
-            parse_channels(channels, nchans, depth);
+            Matrix m(cols, rows, type);
+            memset(m.ptr(), 0, m.rows * m.step_info.linestep);
+            return m;
+        }
 
-            // Create matrix by premitives
-            create(cols, rows, nchans, depth);
+        static Matrix zeros(int cols, int rows, const std::string& channel_string)
+        {
+            Matrix m(cols, rows, channel_string);
+            memset(m.ptr(), 0, m.rows * m.step_info.linestep);
+            return m;
+        }
+
+        static Matrix zeros(int cols, int rows, int channels, uint32_t type_wo_channels)
+        {
+            Matrix m(cols, rows, channels, type_wo_channels);
+            memset(m.ptr(), 0, m.rows * m.step_info.linestep);
+            return m;
+        }
+
+        static Matrix zeros(int cols, int rows, int channels, const std::string& dtype)
+        {
+            Matrix m(cols, rows, channels, dtype);
+            memset(m.ptr(), 0, m.rows * m.step_info.linestep);
+            return m;
+        }
+
+    public:
+        void create(int cols, int rows, uint32_t type)
+        {
+            // Create matrix by type
+            create(cols, rows, MatrixType(type));
+        }
+
+        void create(int cols, int rows, const std::string& channel_string)
+        {
+            // Create matrix by channel string
+            create(cols, rows, MatrixType(channel_string));
+        }
+
+        void create(int cols, int rows, int channels, uint32_t type_wo_channels)
+        {
+            // Create matrix by type with channels
+            MatrixType mt(type_wo_channels);
+            mt.packed.fields.channels = channels;
+            create(cols, rows, mt);
+        }
+
+        void create(int cols, int rows, int channels, const std::string& dtype)
+        {
+            // Create matrix by dtype
+            create(cols, rows, MatrixType(channels, dtype));
         }
 
         template<typename Element>
@@ -249,12 +563,42 @@ namespace lcv
 
         size_t elemSize() const
         {
-            return (int)(type.depth * type.nchans) / 8;
+            return (size_t)step_info.pixelstep;
         }
 
         size_t elemSize1() const
         {
-            return (int)type.depth / 8;
+            return (size_t)step_info.pixelstep / type_info.channels();
+        }
+
+        int width() const
+        {
+            return cols;
+        }
+
+        int height() const
+        {
+            return rows;
+        }
+
+        std::string dtype() const
+        {
+            return type_info.dtype();
+        }
+
+        uint32_t type() const
+        {
+            return type_info.packed.value;
+        }
+
+        int depth() const
+        {
+            return type_info.depth();
+        }
+
+        int channels() const
+        {
+            return type_info.channels();
         }
 
         bool isSubmatrix() const
@@ -267,22 +611,22 @@ namespace lcv
     public:
         byte* ptr(int y=0)
         {
-            return data + (step.linestep * y);
+            return data + (step_info.linestep * y);
         }
 
         const byte* ptr(int y=0) const
         {
-            return data + (step.linestep * y);
+            return data + (step_info.linestep * y);
         }
 
         byte* ptr(int y, int x)
         {
-            return data + (step.linestep * y) + (step.elemstep * x);
+            return data + (step_info.linestep * y) + (step_info.pixelstep * x);
         }
 
         const byte* ptr(int y, int x) const
         {
-            return data + (step.linestep * y) + (step.elemstep * x);
+            return data + (step_info.linestep * y) + (step_info.pixelstep * x);
         }
 
         template<typename Element>

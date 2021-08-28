@@ -8,6 +8,7 @@
 using uchar = uint8_t;
 using ushort = uint16_t;
 
+
 namespace lcv
 {
     // Utility Classes

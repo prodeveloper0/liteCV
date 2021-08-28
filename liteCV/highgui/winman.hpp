@@ -11,6 +11,7 @@
 
 #include "flags.hpp"
 
+
 namespace lcv
 {
     struct KMStatus
@@ -163,4 +164,4 @@ namespace lcv
         }
     }; // class WindowManager_
 } // namespace lcv
-#endif LCV_HIGHGUI_WM // LCV_HIGHGUI_WINMAN
+#endif // LCV_HIGHGUI_WINMAN

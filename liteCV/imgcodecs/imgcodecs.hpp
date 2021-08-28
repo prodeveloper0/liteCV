@@ -1,6 +1,6 @@
 #pragma once
-#ifndef LCV_IMGCODECS_IMGCODECS_HPP
-#define LCV_IMGCODECS_IMGCODECS_HPP
+#ifndef LCV_IMGCODECS_HPP
+#define LCV_IMGCODECS_HPP
 #include <string>
 #include <vector>
 #include <algorithm>
@@ -9,6 +9,15 @@
 #include "liteCV/core/lcvdef.hpp"
 #include "liteCV/core/matrix.hpp"
 #include "liteCV/imgproc/color.hpp"
+#include "flags.hpp"
+
+// Disable some stb's image codecs except JPG, PNG and BMP.
+#define STBI_NO_GIF
+#define STBI_NO_PSD
+#define STBI_NO_PIC
+#define STBI_NO_PNM
+#define STBI_NO_HDR
+#define STBI_NO_TGA
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb/stb_image.h"
@@ -16,17 +25,16 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb/stb_image_write.h"
 
-#include "enums.hpp"
 
 namespace lcv
 {
-    Matrix imread(const std::string& filename, int flag = IMREAD_COLOR)
+    Matrix imread(const std::string& filename, int flag = IMREAD_UNCHANGED)
     {
         Matrix img;
         stbi_uc* data;
         int width, height, channels;
 
-        // Convert image mode `flag` to stbi_load's `req_comp`
+        // Set `req_comp` by flag
         int req_comp;
         if (flag == IMREAD_COLOR)
         {
@@ -36,10 +44,13 @@ namespace lcv
         {
             req_comp = 1;
         }
+        else if (flag == IMREAD_UNCHANGED)
+        {
+            req_comp = 0;
+        }
         else
         {
-            // IMREAD_ANYCOLOR, IMREAD_ANYDEPTH, IMREAD_UNCHANGED are not supported yet :(
-            req_comp = 0;   // Unsupport flag
+            assert(0 && "Unknown flag");
         }
 
         // Load image from file using stb_image
@@ -48,13 +59,17 @@ namespace lcv
             goto ret;
 
         // Copy from buffer
-        img.create(width, height, std::string("8uc") + std::to_string(req_comp));
-        memcpy(img.ptr(), data, (size_t)width * height * req_comp);
+        img.create(width, height, req_comp == 0 ? channels : req_comp, LCV_8U);
+        memcpy(img.ptr(), data, (size_t)height * img.step_info.linestep);
         stbi_image_free(data);
 
-        ret:
-        if (req_comp)
+        // Change pixel order
+        if (img.channels() == 3)
             cvtColor(img, img, COLOR_RGB2BGR);
+        else if (img.channels() == 4)
+            cvtColor(img, img, COLOR_RGBA2BGRA);
+
+        ret:
         return img;
     }
 
@@ -71,27 +86,27 @@ namespace lcv
         // `params` is not used yet :(
         if (extension == ".bmp")
         {
-            return stbi_write_bmp(filename.c_str(), img.cols, img.rows, img.type.nchans, img.ptr()) != 0;
+            return stbi_write_bmp(filename.c_str(), img.cols, img.rows, img.channels(), img.ptr()) != 0;
         }
         else if (extension == ".jpg" || extension == ".jpeg")
         {
-            return stbi_write_jpg(filename.c_str(), img.cols, img.rows, img.type.nchans, img.ptr(), 95) != 0;
+            return stbi_write_jpg(filename.c_str(), img.cols, img.rows, img.channels(), img.ptr(), 95) != 0;
         }
         else if (extension == ".png")
         {
-            return stbi_write_png(filename.c_str(), img.cols, img.rows, img.type.nchans, img.ptr(), img.cols * img.type.nchans) != 0;
+            return stbi_write_png(filename.c_str(), img.cols, img.rows, img.channels(), img.ptr(), img.step_info.linestep) != 0;
         }
         
         return false;
     }
 
-    Matrix imdecode(const std::vector<byte>& buffer, int flag = IMREAD_COLOR)
+    Matrix imdecode(const std::vector<byte>& buffer, int flag = IMREAD_UNCHANGED)
     {
         Matrix img;
         stbi_uc* data;
         int width, height, channels;
 
-        // Convert image mode `flag` to stbi_load's `req_comp`
+        // Set `req_comp` by flag
         int req_comp;
         if (flag == IMREAD_COLOR)
         {
@@ -101,23 +116,33 @@ namespace lcv
         {
             req_comp = 1;
         }
+        else if (flag == IMREAD_UNCHANGED)
+        {
+            req_comp = 0;
+        }
         else
         {
-            // IMREAD_ANYCOLOR, IMREAD_ANYDEPTH, IMREAD_UNCHANGED are not supported yet :(
-            req_comp = 0;   // Unsupport flag
+            assert(0 && "Unknown flag");
         }
 
+        // Convert image mode `flag` to stbi_load's `req_comp`
         // Decode image from buffer using stb_image
         data = stbi_load_from_memory(&buffer[0], (int)buffer.size(), &width, &height, &channels, req_comp);
         if (data == NULL)
             goto ret;
 
         // Copy from buffer
-        img.create(width, height, std::string("8uc") + std::to_string(req_comp));
-        memcpy(img.ptr(), data, (size_t)width * height * req_comp);
+        img.create(width, height, req_comp == 0 ? channels : req_comp, LCV_8U);
+        memcpy(img.ptr(), data, (size_t)height * img.step_info.linestep);
         stbi_image_free(data);
 
-        ret:
+        // Change pixel order
+        if (img.channels() == 3)
+            cvtColor(img, img, COLOR_RGB2BGR);
+        else if (img.channels() == 4)
+            cvtColor(img, img, COLOR_RGBA2BGRA);
+
+    ret:
         return img;
     }
 
@@ -143,17 +168,17 @@ namespace lcv
         // `params` is not used yet :(
         if (extension == ".bmp")
         {
-            if (stbi_write_bmp_to_func(writer_functor, &encoded_buffer, img.cols, img.rows, img.type.nchans, img.ptr()) != 0)
+            if (stbi_write_bmp_to_func(writer_functor, &encoded_buffer, img.cols, img.rows, img.channels(), img.ptr()) != 0)
                 goto success_ret;
         }
         else if (extension == ".jpg" || extension == ".jpeg")
         {
-            if (stbi_write_jpg_to_func(writer_functor, &encoded_buffer, img.cols, img.rows, img.type.nchans, img.ptr(), 95) != 0)
+            if (stbi_write_jpg_to_func(writer_functor, &encoded_buffer, img.cols, img.rows, img.channels(), img.ptr(), 95) != 0)
                 goto success_ret;
         }
         else if (extension == ".png")
         {
-            if (stbi_write_png_to_func(writer_functor, &encoded_buffer, img.cols, img.rows, img.type.nchans, img.ptr(), img.cols * img.type.nchans) != 0)
+            if (stbi_write_png_to_func(writer_functor, &encoded_buffer, img.cols, img.rows, img.channels(), img.ptr(), img.step_info.linestep) != 0)
                 goto success_ret;
         }
 
@@ -168,4 +193,4 @@ namespace lcv
     }
 
 } // namespace lcv
-#endif // LCV_IMGCODECS_IMGCODECS_HPP
+#endif // LCV_IMGCODECS_HPP
