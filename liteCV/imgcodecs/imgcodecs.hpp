@@ -75,6 +75,11 @@ namespace lcv
 
     bool imwrite(const std::string& filename, const Matrix& img, const std::vector<int>& params = std::vector<int>())
     {
+        // Only write grayscale or color (3ch/4ch) image
+        assert(img.channels() == 1 || img.channels() == 3 || img.channels() == 4);
+
+        Matrix _img;
+
         // `std::filesystem` only can use in C++17 :(
         const std::filesystem::path path = filename;
 
@@ -82,19 +87,25 @@ namespace lcv
         std::string extension = path.extension().string();
         std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
 
+        // Change pixel order
+        if (img.channels() == 3)
+            cvtColor(img, _img, COLOR_RGB2BGR);
+        else if (img.channels() == 4)
+            cvtColor(img, _img, COLOR_BGRA2RGBA);
+
         // Write image to file to use proper image encoder by the extension
         // `params` is not used yet :(
         if (extension == ".bmp")
         {
-            return stbi_write_bmp(filename.c_str(), img.cols, img.rows, img.channels(), img.ptr()) != 0;
+            return stbi_write_bmp(filename.c_str(), _img.cols, _img.rows, _img.channels(), _img.ptr()) != 0;
         }
         else if (extension == ".jpg" || extension == ".jpeg")
         {
-            return stbi_write_jpg(filename.c_str(), img.cols, img.rows, img.channels(), img.ptr(), 95) != 0;
+            return stbi_write_jpg(filename.c_str(), _img.cols, _img.rows, _img.channels(), _img.ptr(), 95) != 0;
         }
         else if (extension == ".png")
         {
-            return stbi_write_png(filename.c_str(), img.cols, img.rows, img.channels(), img.ptr(), img.step_info.linestep) != 0;
+            return stbi_write_png(filename.c_str(), _img.cols, _img.rows, _img.channels(), _img.ptr(), _img.step_info.linestep) != 0;
         }
         
         return false;
@@ -136,19 +147,23 @@ namespace lcv
         memcpy(img.ptr(), data, (size_t)height * img.step_info.linestep);
         stbi_image_free(data);
 
-        // Change pixel order
+        // Change pixel order to save as RGB or RGBA
         if (img.channels() == 3)
             cvtColor(img, img, COLOR_RGB2BGR);
         else if (img.channels() == 4)
             cvtColor(img, img, COLOR_RGBA2BGRA);
 
-    ret:
+        ret:
         return img;
     }
 
     bool imencode(const std::string& ext, const Matrix& img, std::vector<byte>& buf, const std::vector<int>& params = std::vector<int>())
     {
+        // Only encode grayscale or color (3ch/4ch) image
+        assert(img.channels() == 1 || img.channels() == 3 || img.channels() == 4);
+
         std::vector<byte> encoded_buffer;
+        Matrix _img;
 
         // Get image file extension from file name to encode image
         std::string extension = ext;
@@ -164,21 +179,27 @@ namespace lcv
         // Reserve memory
         encoded_buffer.reserve((size_t)img.cols * img.rows * img.elemSize());
 
+        // Change pixel order to save as RGB or RGBA
+        if (img.channels() == 3)
+            cvtColor(img, _img, COLOR_RGB2BGR);
+        else if (img.channels() == 4)
+            cvtColor(img, _img, COLOR_BGRA2RGBA);
+
         // Encode image to buffer to use proper image encoder by the extension
         // `params` is not used yet :(
         if (extension == ".bmp")
         {
-            if (stbi_write_bmp_to_func(writer_functor, &encoded_buffer, img.cols, img.rows, img.channels(), img.ptr()) != 0)
+            if (stbi_write_bmp_to_func(writer_functor, &encoded_buffer, _img.cols, _img.rows, _img.channels(), _img.ptr()) != 0)
                 goto success_ret;
         }
         else if (extension == ".jpg" || extension == ".jpeg")
         {
-            if (stbi_write_jpg_to_func(writer_functor, &encoded_buffer, img.cols, img.rows, img.channels(), img.ptr(), 95) != 0)
+            if (stbi_write_jpg_to_func(writer_functor, &encoded_buffer, _img.cols, _img.rows, _img.channels(), _img.ptr(), 95) != 0)
                 goto success_ret;
         }
         else if (extension == ".png")
         {
-            if (stbi_write_png_to_func(writer_functor, &encoded_buffer, img.cols, img.rows, img.channels(), img.ptr(), img.step_info.linestep) != 0)
+            if (stbi_write_png_to_func(writer_functor, &encoded_buffer, _img.cols, _img.rows, _img.channels(), _img.ptr(), _img.step_info.linestep) != 0)
                 goto success_ret;
         }
 

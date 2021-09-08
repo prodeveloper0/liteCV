@@ -48,7 +48,7 @@ LICENSE
 
 RECENT REVISION HISTORY:
 
-      2.27  (          ) document stbi_info better, 16-bit PNM support, bug fixes
+      2.27  (2021-07-11) document stbi_info better, 16-bit PNM support, bug fixes
       2.26  (2020-07-13) many minor fixes
       2.25  (2020-02-02) fix warnings
       2.24  (2020-02-02) fix warnings; thread-local failure_reason and flip_vertically
@@ -103,7 +103,7 @@ RECENT REVISION HISTORY:
     Thomas Ruf              Ronny Chevalier                         github:rlyeh
     Janez Zemva             John Bartholomew   Michal Cichon        github:romigrou
     Jonathan Blow           Ken Hamada         Tero Hanninen        github:svdijk
-                            Laurent Gomila     Cort Stratton        github:snagar
+    Eugene Golushkov        Laurent Gomila     Cort Stratton        github:snagar
     Aruelien Pocheville     Sergio Gonzalez    Thibault Reuille     github:Zelex
     Cass Everitt            Ryamond Barbiero                        github:grim210
     Paul Du Bois            Engin Manap        Aldo Culquicondor    github:sammyhw
@@ -111,7 +111,7 @@ RECENT REVISION HISTORY:
     Josh Tobin                                 Matthew Gregan       github:poppolopoppo
     Julian Raschke          Gregory Mullen     Christian Floisand   github:darealshinji
     Baldur Karlsson         Kevin Schmidt      JR Smith             github:Michaelangel007
-                            Brad Weinberger    Matvey Cherevko      [reserved]
+                            Brad Weinberger    Matvey Cherevko      github:mosra
     Luca Sas                Alexander Veselov  Zack Middleton       [reserved]
     Ryan C. Gordon          [reserved]                              [reserved]
                      DO NOT ADD YOUR NAME HERE
@@ -186,6 +186,24 @@ RECENT REVISION HISTORY:
 //   ok = stbi_info(filename, &x, &y, &n);
 //   // returns ok=1 and sets x, y, n if image is a supported format,
 //   // 0 otherwise.
+//
+// Note that stb_image pervasively uses ints in its public API for sizes,
+// including sizes of memory buffers. This is now part of the API and thus
+// hard to change without causing breakage. As a result, the various image
+// loaders all have certain limits on image size; these differ somewhat
+// by format but generally boil down to either just under 2GB or just under
+// 1GB. When the decoded image would be larger than this, stb_image decoding
+// will fail.
+//
+// Additionally, stb_image will reject image files that have any of their
+// dimensions set to a larger value than the configurable STBI_MAX_DIMENSIONS,
+// which defaults to 2**24 = 16777216 pixels. Due to the above memory limit,
+// the only way to have an image with such dimensions load correctly
+// is for it to have a rather extreme aspect ratio. Either way, the
+// assumption here is that such larger images are likely to be malformed
+// or malicious. If you do need to load an image with individual dimensions
+// larger than that, and it still fits in the overall size limit, you can
+// #define STBI_MAX_DIMENSIONS on your own to be something larger.
 //
 // ===========================================================================
 //
@@ -292,11 +310,10 @@ RECENT REVISION HISTORY:
 //
 // iPhone PNG support:
 //
-// By default we convert iphone-formatted PNGs back to RGB, even though
-// they are internally encoded differently. You can disable this conversion
-// by calling stbi_convert_iphone_png_to_rgb(0), in which case
-// you will always just get the native iphone "format" through (which
-// is BGR stored in RGB).
+// We optionally support converting iPhone-formatted PNGs (which store
+// premultiplied BGRA) back to RGB, even though they're internally encoded
+// differently. To enable this conversion, call
+// stbi_convert_iphone_png_to_rgb(1).
 //
 // Call stbi_set_unpremultiply_on_load(1) as well to force a divide per
 // pixel to remove any premultiplied alpha *only* if the image file explicitly
@@ -500,6 +517,8 @@ STBIDEF void stbi_set_flip_vertically_on_load(int flag_true_if_should_flip);
 // as above, but only applies to images loaded on the thread that calls the function
 // this function is only available if your compiler supports thread-local variables;
 // calling it will fail to link if your compiler doesn't
+STBIDEF void stbi_set_unpremultiply_on_load_thread(int flag_true_if_should_unpremultiply);
+STBIDEF void stbi_convert_iphone_png_to_rgb_thread(int flag_true_if_should_convert);
 STBIDEF void stbi_set_flip_vertically_on_load_thread(int flag_true_if_should_flip);
 
 // ZLIB client - used by PNG, available for other purposes
@@ -759,8 +778,11 @@ static int stbi__sse2_available(void)
 
 #ifdef STBI_NEON
 #include <arm_neon.h>
-// assume GCC or Clang on ARM targets
+#ifdef _MSC_VER
+#define STBI_SIMD_ALIGN(type, name) __declspec(align(16)) type name
+#else
 #define STBI_SIMD_ALIGN(type, name) type name __attribute__((aligned(16)))
+#endif
 #endif
 
 #ifndef STBI_SIMD_ALIGN
@@ -1010,7 +1032,7 @@ static int stbi__mad3sizes_valid(int a, int b, int c, int add)
 }
 
 // returns 1 if "a*b*c*d + add" has no negative terms/factors and doesn't overflow
-#if !defined(STBI_NO_LINEAR) || !defined(STBI_NO_HDR)
+#if !defined(STBI_NO_LINEAR) || !defined(STBI_NO_HDR) || !defined(STBI_NO_PNM)
 static int stbi__mad4sizes_valid(int a, int b, int c, int d, int add)
 {
    return stbi__mul2sizes_valid(a, b) && stbi__mul2sizes_valid(a*b, c) &&
@@ -1033,7 +1055,7 @@ static void *stbi__malloc_mad3(int a, int b, int c, int add)
    return stbi__malloc(a*b*c + add);
 }
 
-#if !defined(STBI_NO_LINEAR) || !defined(STBI_NO_HDR)
+#if !defined(STBI_NO_LINEAR) || !defined(STBI_NO_HDR) || !defined(STBI_NO_PNM)
 static void *stbi__malloc_mad4(int a, int b, int c, int d, int add)
 {
    if (!stbi__mad4sizes_valid(a, b, c, d, add)) return NULL;
@@ -1099,9 +1121,8 @@ static void *stbi__load_main(stbi__context *s, int *x, int *y, int *comp, int re
    ri->channel_order = STBI_ORDER_RGB; // all current input & output are this, but this is here so we can add BGR order
    ri->num_channels = 0;
 
-   #ifndef STBI_NO_JPEG
-   if (stbi__jpeg_test(s)) return stbi__jpeg_load(s,x,y,comp,req_comp, ri);
-   #endif
+   // test the formats with a very explicit header first (at least a FOURCC
+   // or distinctive magic number first)
    #ifndef STBI_NO_PNG
    if (stbi__png_test(s))  return stbi__png_load(s,x,y,comp,req_comp, ri);
    #endif
@@ -1118,6 +1139,13 @@ static void *stbi__load_main(stbi__context *s, int *x, int *y, int *comp, int re
    #endif
    #ifndef STBI_NO_PIC
    if (stbi__pic_test(s))  return stbi__pic_load(s,x,y,comp,req_comp, ri);
+   #endif
+
+   // then the formats that can end up attempting to load with just 1 or 2
+   // bytes matching expectations; these are prone to false positives, so
+   // try them later
+   #ifndef STBI_NO_JPEG
+   if (stbi__jpeg_test(s)) return stbi__jpeg_load(s,x,y,comp,req_comp, ri);
    #endif
    #ifndef STBI_NO_PNM
    if (stbi__pnm_test(s))  return stbi__pnm_load(s,x,y,comp,req_comp, ri);
@@ -1274,12 +1302,12 @@ static void stbi__float_postprocess(float *result, int *x, int *y, int *comp, in
 
 #ifndef STBI_NO_STDIO
 
-#if defined(_MSC_VER) && defined(STBI_WINDOWS_UTF8)
+#if defined(_WIN32) && defined(STBI_WINDOWS_UTF8)
 STBI_EXTERN __declspec(dllimport) int __stdcall MultiByteToWideChar(unsigned int cp, unsigned long flags, const char *str, int cbmb, wchar_t *widestr, int cchwide);
 STBI_EXTERN __declspec(dllimport) int __stdcall WideCharToMultiByte(unsigned int cp, unsigned long flags, const wchar_t *widestr, int cchwide, char *str, int cbmb, const char *defchar, int *used_default);
 #endif
 
-#if defined(_MSC_VER) && defined(STBI_WINDOWS_UTF8)
+#if defined(_WIN32) && defined(STBI_WINDOWS_UTF8)
 STBIDEF int stbi_convert_wchar_to_utf8(char *buffer, size_t bufferlen, const wchar_t* input)
 {
 	return WideCharToMultiByte(65001 /* UTF8 */, 0, input, -1, buffer, (int) bufferlen, NULL, NULL);
@@ -1289,16 +1317,16 @@ STBIDEF int stbi_convert_wchar_to_utf8(char *buffer, size_t bufferlen, const wch
 static FILE *stbi__fopen(char const *filename, char const *mode)
 {
    FILE *f;
-#if defined(_MSC_VER) && defined(STBI_WINDOWS_UTF8)
+#if defined(_WIN32) && defined(STBI_WINDOWS_UTF8)
    wchar_t wMode[64];
    wchar_t wFilename[1024];
-	if (0 == MultiByteToWideChar(65001 /* UTF8 */, 0, filename, -1, wFilename, sizeof(wFilename)))
+	if (0 == MultiByteToWideChar(65001 /* UTF8 */, 0, filename, -1, wFilename, sizeof(wFilename)/sizeof(*wFilename)))
       return 0;
 
-	if (0 == MultiByteToWideChar(65001 /* UTF8 */, 0, mode, -1, wMode, sizeof(wMode)))
+	if (0 == MultiByteToWideChar(65001 /* UTF8 */, 0, mode, -1, wMode, sizeof(wMode)/sizeof(*wMode)))
       return 0;
 
-#if _MSC_VER >= 1400
+#if defined(_MSC_VER) && _MSC_VER >= 1400
 	if (0 != _wfopen_s(&f, wFilename, wMode))
 		f = 0;
 #else
@@ -3239,6 +3267,13 @@ static int stbi__process_frame_header(stbi__jpeg *z, int scan)
       if (z->img_comp[i].v > v_max) v_max = z->img_comp[i].v;
    }
 
+   // check that plane subsampling factors are integer ratios; our resamplers can't deal with fractional ratios
+   // and I've never seen a non-corrupted JPEG file actually use them
+   for (i=0; i < s->img_n; ++i) {
+      if (h_max % z->img_comp[i].h != 0) return stbi__err("bad H","Corrupt JPEG");
+      if (v_max % z->img_comp[i].v != 0) return stbi__err("bad V","Corrupt JPEG");
+   }
+
    // compute interleaved mcu info
    z->img_h_max = h_max;
    z->img_v_max = v_max;
@@ -3793,6 +3828,10 @@ static stbi_uc *load_jpeg_image(stbi__jpeg *z, int *out_x, int *out_y, int *comp
       decode_n = 1;
    else
       decode_n = z->s->img_n;
+
+   // nothing to do if no components requested; check this now to avoid
+   // accessing uninitialized coutput[0] later
+   if (decode_n <= 0) { stbi__cleanup_jpeg(z); return NULL; }
 
    // resample and color-convert
    {
@@ -4896,18 +4935,45 @@ static int stbi__expand_png_palette(stbi__png *a, stbi_uc *palette, int len, int
    return 1;
 }
 
-static int stbi__unpremultiply_on_load = 0;
-static int stbi__de_iphone_flag = 0;
+static int stbi__unpremultiply_on_load_global = 0;
+static int stbi__de_iphone_flag_global = 0;
 
 STBIDEF void stbi_set_unpremultiply_on_load(int flag_true_if_should_unpremultiply)
 {
-   stbi__unpremultiply_on_load = flag_true_if_should_unpremultiply;
+   stbi__unpremultiply_on_load_global = flag_true_if_should_unpremultiply;
 }
 
 STBIDEF void stbi_convert_iphone_png_to_rgb(int flag_true_if_should_convert)
 {
-   stbi__de_iphone_flag = flag_true_if_should_convert;
+   stbi__de_iphone_flag_global = flag_true_if_should_convert;
 }
+
+#ifndef STBI_THREAD_LOCAL
+#define stbi__unpremultiply_on_load  stbi__unpremultiply_on_load_global
+#define stbi__de_iphone_flag  stbi__de_iphone_flag_global
+#else
+static STBI_THREAD_LOCAL int stbi__unpremultiply_on_load_local, stbi__unpremultiply_on_load_set;
+static STBI_THREAD_LOCAL int stbi__de_iphone_flag_local, stbi__de_iphone_flag_set;
+
+STBIDEF void stbi__unpremultiply_on_load_thread(int flag_true_if_should_unpremultiply)
+{
+   stbi__unpremultiply_on_load_local = flag_true_if_should_unpremultiply;
+   stbi__unpremultiply_on_load_set = 1;
+}
+
+STBIDEF void stbi_convert_iphone_png_to_rgb_thread(int flag_true_if_should_convert)
+{
+   stbi__de_iphone_flag_local = flag_true_if_should_convert;
+   stbi__de_iphone_flag_set = 1;
+}
+
+#define stbi__unpremultiply_on_load  (stbi__unpremultiply_on_load_set           \
+                                       ? stbi__unpremultiply_on_load_local      \
+                                       : stbi__unpremultiply_on_load_global)
+#define stbi__de_iphone_flag  (stbi__de_iphone_flag_set                         \
+                                ? stbi__de_iphone_flag_local                    \
+                                : stbi__de_iphone_flag_global)
+#endif // STBI_THREAD_LOCAL
 
 static void stbi__de_iphone(stbi__png *z)
 {
@@ -5289,6 +5355,32 @@ typedef struct
    int extra_read;
 } stbi__bmp_data;
 
+static int stbi__bmp_set_mask_defaults(stbi__bmp_data *info, int compress)
+{
+   // BI_BITFIELDS specifies masks explicitly, don't override
+   if (compress == 3)
+      return 1;
+
+   if (compress == 0) {
+      if (info->bpp == 16) {
+         info->mr = 31u << 10;
+         info->mg = 31u <<  5;
+         info->mb = 31u <<  0;
+      } else if (info->bpp == 32) {
+         info->mr = 0xffu << 16;
+         info->mg = 0xffu <<  8;
+         info->mb = 0xffu <<  0;
+         info->ma = 0xffu << 24;
+         info->all_a = 0; // if all_a is 0 at end, then we loaded alpha channel but it was all 0
+      } else {
+         // otherwise, use defaults, which is all-0
+         info->mr = info->mg = info->mb = info->ma = 0;
+      }
+      return 1;
+   }
+   return 0; // error
+}
+
 static void *stbi__bmp_parse_header(stbi__context *s, stbi__bmp_data *info)
 {
    int hsz;
@@ -5316,6 +5408,8 @@ static void *stbi__bmp_parse_header(stbi__context *s, stbi__bmp_data *info)
    if (hsz != 12) {
       int compress = stbi__get32le(s);
       if (compress == 1 || compress == 2) return stbi__errpuc("BMP RLE", "BMP type not supported: RLE");
+      if (compress >= 4) return stbi__errpuc("BMP JPEG/PNG", "BMP type not supported: unsupported compression"); // this includes PNG/JPEG modes
+      if (compress == 3 && info->bpp != 16 && info->bpp != 32) return stbi__errpuc("bad BMP", "bad BMP"); // bitfields requires 16 or 32 bits/pixel
       stbi__get32le(s); // discard sizeof
       stbi__get32le(s); // discard hres
       stbi__get32le(s); // discard vres
@@ -5330,17 +5424,7 @@ static void *stbi__bmp_parse_header(stbi__context *s, stbi__bmp_data *info)
          }
          if (info->bpp == 16 || info->bpp == 32) {
             if (compress == 0) {
-               if (info->bpp == 32) {
-                  info->mr = 0xffu << 16;
-                  info->mg = 0xffu <<  8;
-                  info->mb = 0xffu <<  0;
-                  info->ma = 0xffu << 24;
-                  info->all_a = 0; // if all_a is 0 at end, then we loaded alpha channel but it was all 0
-               } else {
-                  info->mr = 31u << 10;
-                  info->mg = 31u <<  5;
-                  info->mb = 31u <<  0;
-               }
+               stbi__bmp_set_mask_defaults(info, compress);
             } else if (compress == 3) {
                info->mr = stbi__get32le(s);
                info->mg = stbi__get32le(s);
@@ -5355,6 +5439,7 @@ static void *stbi__bmp_parse_header(stbi__context *s, stbi__bmp_data *info)
                return stbi__errpuc("bad BMP", "bad BMP");
          }
       } else {
+         // V4/V5 header
          int i;
          if (hsz != 108 && hsz != 124)
             return stbi__errpuc("bad BMP", "bad BMP");
@@ -5362,6 +5447,8 @@ static void *stbi__bmp_parse_header(stbi__context *s, stbi__bmp_data *info)
          info->mg = stbi__get32le(s);
          info->mb = stbi__get32le(s);
          info->ma = stbi__get32le(s);
+         if (compress != 3) // override mr/mg/mb unless in BI_BITFIELDS mode, as per docs
+            stbi__bmp_set_mask_defaults(info, compress);
          stbi__get32le(s); // discard color space
          for (i=0; i < 12; ++i)
             stbi__get32le(s); // discard color space parameters
@@ -6835,9 +6922,10 @@ static void *stbi__load_gif_main(stbi__context *s, int **delays, int *x, int *y,
                }
 
                if (delays) {
-                  *delays = (int*) STBI_REALLOC_SIZED( *delays, delays_size, sizeof(int) * layers );
-                  if (!*delays)
+                  int *new_delays = (int*) STBI_REALLOC_SIZED( *delays, delays_size, sizeof(int) * layers );
+                  if (!new_delays)
                      return stbi__load_gif_main_outofmem(&g, out, delays);
+                  *delays = new_delays;
                   delays_size = layers * sizeof(int);
                }
             } else {
@@ -7173,9 +7261,10 @@ static int stbi__bmp_info(stbi__context *s, int *x, int *y, int *comp)
 
    info.all_a = 255;
    p = stbi__bmp_parse_header(s, &info);
-   stbi__rewind( s );
-   if (p == NULL)
+   if (p == NULL) {
+      stbi__rewind( s );
       return 0;
+   }
    if (x) *x = s->img_x;
    if (y) *y = s->img_y;
    if (comp) {
@@ -7447,7 +7536,6 @@ static int stbi__pnm_is16(stbi__context *s)
 	   return 1;
    return 0;
 }
-
 #endif
 
 static int stbi__info_main(stbi__context *s, int *x, int *y, int *comp)
