@@ -93,10 +93,7 @@ namespace lcv
             if (bpp == 8)
             {
                 for (int i = 0; i < 256; ++i)
-                {
-                    RGBQUAD q = { (BYTE)i, (BYTE)i, (BYTE)i, 0 };
-                    (*pbmi).bmiColors[0] = q;
-                }
+                    (*pbmi).bmiColors[i] = RGBQUAD{ (BYTE)i, (BYTE)i, (BYTE)i, 0 };
             }
 
             // Create buffer
@@ -175,7 +172,7 @@ namespace lcv
     public:
         void Draw(HWND hwnd, HDC hdc)
         {
-            ::SetDIBitsToDevice(hdc, 0, 0, Width(), Height(), 0, 0, 0, Height(), pdata, pbmi, Bpp() != 8 ? DIB_RGB_COLORS : DIB_PAL_COLORS);
+            ::SetDIBitsToDevice(hdc, 0, 0, Width(), Height(), 0, 0, 0, Height(), pdata, pbmi, DIB_RGB_COLORS);
         }
     }; // class DIB
 } // namespace lcv
