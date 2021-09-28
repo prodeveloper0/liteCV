@@ -4,9 +4,17 @@
 #include <stdint.h>
 #include <assert.h>
 
-// OpenCV's premitive types
-using uchar = uint8_t;
-using ushort = uint16_t;
+
+// OpenMP declaration macro
+#ifdef _OPENMP
+#ifdef _MSC_VER
+#define LCV_OMP_LOOP_FOR __pragma(omp parallel for) 
+#else
+#define LCV_OMP_LOOP_FOR _Pragma("omp parallel for")
+#endif
+#else
+#define LCV_OMP_LOOP_FOR
+#endif
 
 
 namespace lcv
@@ -51,4 +59,16 @@ namespace lcv
     using float32 = float;
     using float64 = double;
 } // namespace lcv
+
+
+// OpenCV's premitive types
+using uchar = uint8_t;
+using ushort = uint16_t;
+
+
+template<typename T>
+T inline lcvModulo(T a, T b)
+{
+	return (b + (a % b)) % b;
+} // lcvModulo
 #endif // LCV_CORE_LCVDEF_HPP

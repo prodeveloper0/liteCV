@@ -20,23 +20,23 @@ namespace lcv
 		auto w = WindowManager::instance()->get(title, flags);
 		w->flags(flags);
 		w->show();
-	}
+	} // namedWindow
 
 	void imshow(const std::string& title, const Matrix& mat)
 	{
 		auto win = WindowManager::instance()->get(title);
 		win->show(mat);
-	}
+	} // imshow
 
 	void destroyWindow(const std::string& title)
 	{
 		WindowManager::instance()->release(title);
-	}
+	} // destroyWindow
 
 	void destroyAllWindows()
 	{
 		WindowManager::instance()->release_all();
-	}
+	} // destroyAllWindows
 
 	int waitKey(int delay = 0)
 	{
@@ -44,6 +44,6 @@ namespace lcv
 		WindowManager::event()->loop(delay);
 		WindowManager::event()->status(km);
 		return km.keyboad.keycode;
-	}
+	} // waitKey
 } // namespace lcv
 #endif // LCV_HIGHGUI_HPP

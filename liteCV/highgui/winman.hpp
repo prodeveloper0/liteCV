@@ -39,7 +39,7 @@ namespace lcv
             memset(&keyboad, 0, sizeof(keyboad));
             memset(&mouse, 0, sizeof(mouse));
         }
-    };
+    }; // class KMStatus
 
     class IEvent : Noncopyable
     {

@@ -30,7 +30,7 @@ namespace lcv
         assert(src.type() == LCV_8UC3);
         Matrix dst_image(src.cols, src.rows, LCV_8UC3);
 
-        //#pragma omp parallel for num_threads(4)
+        LCV_OMP_LOOP_FOR
         for (int y = 0;y < src.rows;++y)
         {
             const Vec3b* src_stride = (Vec3b*)src.ptr(y);
@@ -52,7 +52,7 @@ namespace lcv
         assert(src.type() == LCV_8UC3);
         Matrix dst_image(src.cols, src.rows, LCV_8UC4);
 
-        //#pragma omp parallel for num_threads(4)
+        LCV_OMP_LOOP_FOR
         for (int y = 0; y < src.rows; ++y)
         {
             const Vec3b* src_stride = (Vec3b*)src.ptr(y);
@@ -75,7 +75,7 @@ namespace lcv
         assert(src.type() == LCV_8UC3);
         Matrix dst_image(src.cols, src.rows, LCV_8UC1);
 
-        //#pragma omp parallel for num_threads(4)
+        LCV_OMP_LOOP_FOR
         for (int y = 0; y < src.rows; ++y)
         {
             const Vec3b* src_stride = (Vec3b*)src.ptr(y);
@@ -99,7 +99,7 @@ namespace lcv
         assert(src.type() == LCV_8UC4);
         Matrix dst_image(src.cols, src.rows, LCV_8UC4);
 
-        //#pragma omp parallel for num_threads(4)
+        LCV_OMP_LOOP_FOR
         for (int y = 0; y < src.rows; ++y)
         {
             const Vec4b* src_stride = (Vec4b*)src.ptr(y);
@@ -122,7 +122,7 @@ namespace lcv
         assert(src.type() == LCV_8UC4);
         Matrix dst_image(src.cols, src.rows, LCV_8UC3);
 
-        //#pragma omp parallel for num_threads(4)
+        LCV_OMP_LOOP_FOR
         for (int y = 0; y < src.rows; ++y)
         {
             const Vec4b* src_stride = (Vec4b*)src.ptr(y);
@@ -144,7 +144,7 @@ namespace lcv
         assert(src.type() == LCV_8UC4);
         Matrix dst_image(src.cols, src.rows, LCV_8UC1);
 
-        //#pragma omp parallel for num_threads(4)
+        LCV_OMP_LOOP_FOR
         for (int y = 0; y < src.rows; ++y)
         {
             const Vec4b* src_stride = (Vec4b*)src.ptr(y);
@@ -168,7 +168,7 @@ namespace lcv
         assert(src.type() == LCV_8UC1);
         Matrix dst_image(src.cols, src.rows, LCV_8UC3);
 
-        //#pragma omp parallel for num_threads(4)
+        LCV_OMP_LOOP_FOR
         for (int y = 0; y < src.rows; ++y)
         {
             const byte* src_stride = src.ptr(y);
@@ -190,7 +190,7 @@ namespace lcv
         assert(src.type() == LCV_8UC1);
         Matrix dst_image(src.cols, src.rows, LCV_8UC4);
 
-        //#pragma omp parallel for num_threads(4)
+        LCV_OMP_LOOP_FOR
         for (int y = 0; y < src.rows; ++y)
         {
             const byte* src_stride = src.ptr(y);
@@ -243,11 +243,12 @@ namespace lcv
             // GRAY -> ?
         case COLOR_GRAY2BGR:
             cvtColor_GRAY2BGR(src, dst);
+            break;
 
         case COLOR_GRAY2BGRA:
             cvtColor_GRAY2BGRA(src, dst);
             break;
         }
-    }
+    } // cvtColor
 } // namespace lcv
 #endif // LCV_IMGPROC_COLOR_HPP

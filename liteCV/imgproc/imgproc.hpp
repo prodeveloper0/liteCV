@@ -2,4 +2,5 @@
 #ifndef LCV_IMGPROC_HPP
 #define LCV_IMGPROC_HPP
 #include "color.hpp"
+#include "filter.hpp"
 #endif // LCV_IMGPROC_HPP

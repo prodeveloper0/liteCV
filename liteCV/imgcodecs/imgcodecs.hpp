@@ -71,7 +71,7 @@ namespace lcv
 
         ret:
         return img;
-    }
+    } // imread
 
     bool imwrite(const std::string& filename, const Matrix& img, const std::vector<int>& params = std::vector<int>())
     {
@@ -109,7 +109,7 @@ namespace lcv
         }
         
         return false;
-    }
+    } // imwrite
 
     Matrix imdecode(const std::vector<byte>& buffer, int flag = IMREAD_UNCHANGED)
     {
@@ -155,7 +155,7 @@ namespace lcv
 
         ret:
         return img;
-    }
+    } // imdecode
 
     bool imencode(const std::string& ext, const Matrix& img, std::vector<byte>& buf, const std::vector<int>& params = std::vector<int>())
     {
@@ -211,7 +211,6 @@ namespace lcv
         encoded_buffer.shrink_to_fit();
         buf = encoded_buffer;
         return true;
-    }
-
+    } // imencode
 } // namespace lcv
 #endif // LCV_IMGCODECS_HPP

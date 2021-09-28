@@ -20,6 +20,7 @@ Especially, we are focusing implementing OpenCV's `core`, `imgcodec`, `imgproc` 
 
 ## Image Processing (`imgproc`)
 1. Color Conversion (equivalent to `cv::cvtColor`)
+2. Image Filters (equivalent to `cv::filter2D`, etc...)
 
 ## High-level GUI
 1. Display Image (equivalent to `cv::imshow`/`cv::namedWindow`)
