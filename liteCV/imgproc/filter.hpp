@@ -55,5 +55,21 @@ namespace lcv
 
         dst = output;
     } // filter2D
+
+    void boxFilter(const Matrix& src, Matrix& dst, uint32_t ddepth, Size ksize, Point anchor = Point(-1, -1), bool normalize = true, int borderType = 4)
+    {
+        // Make box filter
+        lcv::Mat kernel(ksize.width, ksize.height, 1, LCV_32F);
+        for (int i = 0; i < kernel.cols * kernel.rows; ++i)
+            kernel.ptr<float>()[i] = normalize ? (1.f / (ksize.width * ksize.height)) : 1.f;
+
+        // Convolve filter
+        filter2D(src, dst, ddepth, kernel, anchor, 0., borderType);
+    } // boxFilter
+
+    void blur(const Matrix& src, Matrix& dst, Size size, Point anchor = Point(-1, -1), int borderType = 4)
+    {
+        boxFilter(src, dst, src.depth(), size, anchor, true, borderType);
+    } // blur
 }; // namespace lcv
 #endif // LCV_IMGPROC_FILTER_HPP

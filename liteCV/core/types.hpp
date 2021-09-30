@@ -262,6 +262,11 @@ namespace lcv
         }
     }; // class Size_
 
+    using Size2i = Size_<int32>;
+    using Size2f = Size_<float32>;
+    using Size2d = Size_<float64>;
+    using Size = Size2i;
+
     /* ///////////////////////////////////////
     *  //    Rect_
     */ //
