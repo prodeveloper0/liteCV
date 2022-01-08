@@ -64,11 +64,4 @@ namespace lcv
 // OpenCV's premitive types
 using uchar = uint8_t;
 using ushort = uint16_t;
-
-
-template<typename T>
-T inline lcvModulo(T a, T b)
-{
-	return (b + (a % b)) % b;
-} // lcvModulo
 #endif // LCV_CORE_LCVDEF_HPP
