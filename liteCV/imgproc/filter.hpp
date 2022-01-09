@@ -3,18 +3,19 @@
 #include "liteCV/core/lcvdef.hpp"
 #include "liteCV/core/matrix.hpp"
 #include "liteCV/core/types.hpp"
+#include "liteCV/core/math.hpp"
+#include "liteCV/core/saturate.hpp"
+
+#include "border.hpp"
 
 
 namespace lcv
 {
-    void filter2D(const Matrix& src, Matrix& dst, uint32_t ddepth, const Matrix& kernel, Point anchor = Point(-1, -1), double delta = 0, int borderType = 4)
+    void filter2D(const Matrix& src, Matrix& dst, uint32_t ddepth, const Matrix& kernel, Point anchor = Point(-1, -1), double delta = 0, int borderType = BORDER_DEFAULT)
     {
-        // Only support BORDER_DEFAULT
-        assert(borderType == 4);
-
         // Only support 8-bits depth image
-        assert(src.depth() == LCV_8U);
-        assert(ddepth == LCV_8U);
+        // `-1` means same as source
+        assert(src.depth() == LCV_8U && (ddepth == LCV_8U || ddepth == -1));
 
         // Kernel must be 32-bits float
         assert(kernel.depth() == LCV_32F);
@@ -42,13 +43,16 @@ namespace lcv
                         const float* krnl_scanline = kernel.ptr<float>(ky);
                         for (int kx = 0; kx < kernel.cols; ++kx)
                         {
-                            const int ry = lcvModulo(y - (kernel.rows / 2) + ky + (anchor.y != -1 ? anchor.y : 0), output.rows);
-                            const int rx = lcvModulo(x - (kernel.cols / 2) + kx + (anchor.x != -1 ? anchor.x : 0), output.cols);
+                            BorderPolicy* bp = BorderPolicyStorage::get_policy(borderType);
+
+                            const int ry = bp->calculate(y - (kernel.rows / 2) + ky + (anchor.y != -1 ? anchor.y : 0), output.rows);
+                            const int rx = bp->calculate(x - (kernel.cols / 2) + kx + (anchor.x != -1 ? anchor.x : 0), output.cols);
+
                             sum += (krnl_scanline[kx] * (int)src.ptr<uint8_t>(ry, rx)[ch]);
                         }
                     } // Conolve
 
-                    output.ptr<uint8_t>(y, x)[ch] = (uint8_t)(sum + delta);
+                    output.ptr<uint8_t>(y, x)[ch] = saturate_cast<uint8_t>(sum + delta);
                 } // Channel
             } // Height 
         } // Width
@@ -56,7 +60,7 @@ namespace lcv
         dst = output;
     } // filter2D
 
-    void boxFilter(const Matrix& src, Matrix& dst, uint32_t ddepth, Size ksize, Point anchor = Point(-1, -1), bool normalize = true, int borderType = 4)
+    void boxFilter(const Matrix& src, Matrix& dst, uint32_t ddepth, Size ksize, Point anchor = Point(-1, -1), bool normalize = true, int borderType = BORDER_DEFAULT)
     {
         // Make box filter
         lcv::Mat kernel(ksize.width, ksize.height, 1, LCV_32F);
@@ -67,7 +71,7 @@ namespace lcv
         filter2D(src, dst, ddepth, kernel, anchor, 0., borderType);
     } // boxFilter
 
-    void blur(const Matrix& src, Matrix& dst, Size size, Point anchor = Point(-1, -1), int borderType = 4)
+    void blur(const Matrix& src, Matrix& dst, Size size, Point anchor = Point(-1, -1), int borderType = BORDER_DEFAULT)
     {
         boxFilter(src, dst, src.depth(), size, anchor, true, borderType);
     } // blur
