@@ -47,7 +47,7 @@ namespace lcv
 
         int calculate(int p, int max_boundary) final
         {
-            return std::max<int>(std::min<int>(p, max_boundary), 0);
+            return std::max<int>(std::min<int>(p, max_boundary - 1), 0);
         }
     }; // class ReplicateBorderPolicy
 
@@ -62,14 +62,9 @@ namespace lcv
         int calculate(int p, int max_boundary) final
         {
             if (p < 0)
-            {
-                p = std::min<int>(-(p + 1), max_boundary);
-            }
+                return std::min<int>(-p - 1, max_boundary - 1);
             else if (p >= max_boundary)
-            {
-                p = std::max<int>(max_boundary - p, 0);
-            }
-
+                return std::max<int>(max_boundary - (p - max_boundary) - 1, 0);
             return p;
         }
     }; // class ReflectBorderPolicy
@@ -85,14 +80,9 @@ namespace lcv
         int calculate(int p, int max_boundary) final
         {
             if (p < 0)
-            {
-                p = std::min<int>(-p, max_boundary);
-            }
+                return std::min<int>(-p, max_boundary - 1);
             else if (p >= max_boundary)
-            {
-                p = std::max<int>(max_boundary - p + 1, 0);
-            }
-
+                return std::max<int>(max_boundary - (p - max_boundary) - 2, 0);
             return p;
         }
     }; // class Reflect101BorderPolicy
@@ -107,7 +97,7 @@ namespace lcv
         {
             static ConstantBorderPolicy cbp;
             static ReplicateBorderPolicy repbp;
-            static Reflect101BorderPolicy refbp;
+            static ReflectBorderPolicy refbp;
             static Reflect101BorderPolicy ref101bp;
 
             switch (type)
