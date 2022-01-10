@@ -19,14 +19,14 @@ namespace lcv
     class BorderPolicy
     {
     public:
-        virtual bool is_constant() = 0;
+        virtual bool is_constant() const = 0;
         virtual int calculate(int p, int max_boundary) = 0;
     }; // class BorderPolicy
 
     class ConstantBorderPolicy : public BorderPolicy
     {
     public:
-        bool is_constant() final
+        bool is_constant() const final
         {
             return true;
         }
@@ -40,7 +40,7 @@ namespace lcv
     class ReplicateBorderPolicy : public BorderPolicy
     {
     public:
-        bool is_constant() final
+        bool is_constant() const final
         {
             return false;
         }
@@ -54,7 +54,7 @@ namespace lcv
     class ReflectBorderPolicy : public BorderPolicy
     {
     public:
-        bool is_constant() final
+        bool is_constant() const final
         {
             return false;
         }
@@ -72,7 +72,7 @@ namespace lcv
     class Reflect101BorderPolicy : public BorderPolicy
     {
     public:
-        bool is_constant() final
+        bool is_constant() const final
         {
             return false;
         }
