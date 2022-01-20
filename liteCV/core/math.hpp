@@ -13,9 +13,21 @@ namespace lcv
     } // lcvModulo
 
     template<typename Float>
-    int32 inline lcvRound(Float v)
+    int inline lcvRound(Float v)
     {
         return (int)(v + ((Float)0.5));
     } // lcvRound
+
+    template<typename Float>
+    int inline lcvFloor(Float v)
+    {
+        return (int)v - (((int)v > v) ? 1 : 0);
+    } // lcvFloor
+
+    template<typename Float>
+    int inline lcvCeil(Float v)
+    {
+        return (int)v + (((int)v < v) ? 1 : 0);
+    } // lcvCeil
 } // namespace lcv
 #endif // LCV_CORE_MATH_HPP

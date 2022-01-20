@@ -1,6 +1,8 @@
 #pragma once
 #ifndef LCV_CORE_TYPES_HPP
 #define LCV_CORE_TYPES_HPP
+
+
 namespace lcv
 {
     /* ///////////////////////////////////////
@@ -94,18 +96,18 @@ namespace lcv
 	}; // class Element_
 
     // Elements by type and channel
-	using Element2b = Element_<uint8, 2>;
-	using Element3b = Element_<uint8, 3>;
-	using Element4b = Element_<uint8, 4>;
-	using Element2s = Element_<int16, 2>;
-	using Element3s = Element_<int16, 3>;
-	using Element4s = Element_<int16, 4>;
-	using Element2w = Element_<uint16, 2>;
-	using Element3w = Element_<uint16, 3>;
-	using Element4w = Element_<uint16, 4>;
-	using Element2i = Element_<int32, 2>;
-	using Element3i = Element_<int32, 3>;
-	using Element4i = Element_<int32, 4>;
+	using Element2b = Element_<uchar, 2>;
+	using Element3b = Element_<uchar, 3>;
+	using Element4b = Element_<uchar, 4>;
+	using Element2s = Element_<short, 2>;
+	using Element3s = Element_<short, 3>;
+	using Element4s = Element_<short, 4>;
+	using Element2w = Element_<ushort, 2>;
+	using Element3w = Element_<ushort, 3>;
+	using Element4w = Element_<ushort, 4>;
+	using Element2i = Element_<int, 2>;
+	using Element3i = Element_<int, 3>;
+	using Element4i = Element_<int, 4>;
 	using Element2f = Element_<float32, 2>;
 	using Element3f = Element_<float32, 3>;
 	using Element4f = Element_<float32, 4>;
@@ -117,18 +119,18 @@ namespace lcv
 	template<typename Type, int N>
 	using Vec = Element_<Type, N>;
 
-	using Vec2b = Vec<uint8, 2>;
-	using Vec3b = Vec<uint8, 3>;
-	using Vec4b = Vec<uint8, 4>;
-	using Vec2s = Vec<int16, 2>;
-	using Vec3s = Vec<int16, 3>;
-	using Vec4s = Vec<int16, 4>;
-	using Vec2w = Vec<uint16, 2>;
-	using Vec3w = Vec<uint16, 3>;
-	using Vec4w = Vec<uint16, 4>;
-	using Vec2i = Vec<int32, 2>;
-	using Vec3i = Vec<int32, 3>;
-	using Vec4i = Vec<int32, 4>;
+	using Vec2b = Vec<uchar, 2>;
+	using Vec3b = Vec<uchar, 3>;
+	using Vec4b = Vec<uchar, 4>;
+	using Vec2s = Vec<short, 2>;
+	using Vec3s = Vec<short, 3>;
+	using Vec4s = Vec<short, 4>;
+	using Vec2w = Vec<ushort, 2>;
+	using Vec3w = Vec<ushort, 3>;
+	using Vec4w = Vec<ushort, 4>;
+	using Vec2i = Vec<int, 2>;
+	using Vec3i = Vec<int, 3>;
+	using Vec4i = Vec<int, 4>;
 	using Vec2f = Vec<float32, 2>;
 	using Vec3f = Vec<float32, 3>;
 	using Vec4f = Vec<float32, 4>;
@@ -210,13 +212,13 @@ namespace lcv
         }
     }; // class Point3_
 
-    using Point2i = Point_<int32>;
+    using Point2i = Point_<int>;
     using Point2l = Point_<int64>;
     using Point2f = Point_<float32>;
     using Point2d = Point_<float64>;
     using Point = Point2i;
 
-    using Point3i = Point3_<int32>;
+    using Point3i = Point3_<int>;
     using Point3f = Point3_<float32>;
     using Point3d = Point3_<float32>;
 
@@ -262,7 +264,7 @@ namespace lcv
         }
     }; // class Size_
 
-    using Size2i = Size_<int32>;
+    using Size2i = Size_<int>;
     using Size2f = Size_<float32>;
     using Size2d = Size_<float64>;
     using Size = Size2i;
@@ -332,7 +334,7 @@ namespace lcv
         }
     }; // class Rect_
 
-    using Rect2i = Rect_<int32>;
+    using Rect2i = Rect_<int>;
     using Rect2f = Rect_<float32>;
     using Rect2d = Rect_<float64>;
     using Rect = Rect2i;

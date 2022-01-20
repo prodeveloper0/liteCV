@@ -72,31 +72,31 @@ namespace lcv
     template<>
     uint8 inline saturate_cast<uint8>(int8 v)
     {
-        return clip<uint8, int8, int32>(v, (int32)UINT8_MAX, 0);
+        return clip<uint8, int8, int32>(v, UINT8_MAX, 0);
     }
 
     template<>
     uint8 inline saturate_cast<uint8>(uint16 v)
     {
-        return clip<uint8, uint16, uint32>(v, (uint32)UINT8_MAX);
+        return clip<uint8, uint16, uint32>(v, UINT8_MAX);
     }
 
     template<>
     uint8 inline saturate_cast<uint8>(int16 v)
     {
-        return clip<uint8, int16, int32>(v, (int32)UINT8_MAX, 0);
+        return clip<uint8, int16, int32>(v, UINT8_MAX, 0);
     }
 
     template<>
     uint8 inline saturate_cast<uint8>(uint32 v)
     {
-        return clip<uint8, uint32, uint32>(v, (uint32)UINT8_MAX);
+        return clip<uint8, uint32, uint32>(v, UINT8_MAX);
     }
 
     template<>
     uint8 inline saturate_cast<uint8>(int32 v)
     {
-        return clip<uint8, int32, int32>(v, (int32)UINT8_MAX, 0);
+        return clip<uint8, int32, int32>(v, UINT8_MAX, 0);
     }
 
     template<>
@@ -114,31 +114,31 @@ namespace lcv
     template<>
     int8 inline saturate_cast<int8>(uint8 v)
     {
-        return clip<int8, uint8, uint32>(v, (int32)INT8_MAX);
+        return clip<int8, uint8, uint32>(v, INT8_MAX);
     }
 
     template<>
     int8 inline saturate_cast<int8>(uint16 v)
     {
-        return clip<int8, uint16, uint32>(v, (uint32)INT8_MAX);
+        return clip<int8, uint16, uint32>(v, INT8_MAX);
     }
 
     template<>
     int8 inline saturate_cast<int8>(int16 v)
     {
-        return clip<int8, int16, int32>(v, (int32)INT8_MAX, (int32)INT8_MIN);
+        return clip<int8, int16, int32>(v, INT8_MAX, INT8_MIN);
     }
 
     template<>
     int8 inline saturate_cast<int8>(uint32 v)
     {
-        return clip<int8, uint32, uint32>(v, (uint32)INT8_MAX);
+        return clip<int8, uint32, uint32>(v, INT8_MAX);
     }
 
     template<>
     int8 inline saturate_cast<int8>(int32 v)
     {
-        return clip<int8, int32, int32>(v, (int32)INT8_MAX, (int32)INT8_MIN);
+        return clip<int8, int32, int32>(v, INT8_MAX, INT8_MIN);
     }
 
     template<>
@@ -156,25 +156,25 @@ namespace lcv
     template<>
     uint16 inline saturate_cast<uint16>(int8 v)
     {
-        return clip<uint16, int8, int32>(v, (int32)UINT16_MAX, 0);
+        return clip<uint16, int8, int32>(v, UINT16_MAX, 0);
     }
 
     template<>
     uint16 inline saturate_cast<uint16>(int16 v)
     {
-        return clip<uint16, int16, int32>(v, (int32)UINT16_MAX, 0);
+        return clip<uint16, int16, int32>(v, UINT16_MAX, 0);
     }
 
     template<>
     uint16 inline saturate_cast<uint16>(uint32 v)
     {
-        return clip<uint16, uint32, uint32>(v, (uint32)UINT16_MAX);
+        return clip<uint16, uint32, uint32>(v, UINT16_MAX);
     }
 
     template<>
     uint16 inline saturate_cast<uint16>(int32 v)
     {
-        return clip<uint16, int32, int32>(v, (int32)UINT16_MAX, 0);
+        return clip<uint16, int32, int32>(v, UINT16_MAX, 0);
     }
 
     template<>
@@ -192,19 +192,19 @@ namespace lcv
     template<>
     int16 inline saturate_cast<int16>(uint16 v)
     {
-        return clip<int16, uint16, uint32>(v, (uint32)INT16_MAX);
+        return clip<int16, uint16, uint32>(v, INT16_MAX);
     }
 
     template<>
     int16 inline saturate_cast<int16>(uint32 v)
     {
-        return clip<int16, uint32, uint32>(v, (uint32)INT16_MAX);
+        return clip<int16, uint32, uint32>(v, INT16_MAX);
     }
 
     template<>
     int16 inline saturate_cast<int16>(int32 v)
     {
-        return clip<int16, int32, int32>(v, (int32)INT16_MAX, (int32)INT16_MIN);
+        return clip<int16, int32, int32>(v, INT16_MAX, INT16_MIN);
     }
 
     template<>
@@ -222,19 +222,19 @@ namespace lcv
     template<>
     uint32 inline saturate_cast<uint32>(int8 v)
     {
-        return clip<uint32, int8, int32>(v, (int32)UINT32_MAX, 0);
+        return (uint32)clip<uint32, int8, int8>(v, INT8_MAX, 0);
     }
 
     template<>
     uint32 inline saturate_cast<uint32>(int16 v)
     {
-        return clip<uint32, int16, int32>(v, (int32)UINT32_MAX, 0);
+        return (uint32)clip<uint32, int16, int16>(v, INT16_MAX, 0);
     }
 
     template<>
     uint32 inline saturate_cast<uint32>(int32 v)
     {
-        return clip<uint32, int32, int32>(v, (int32)UINT32_MAX, 0);
+        return (uint32)clip<uint32, int32, int32>(v, INT32_MAX, 0);
     }
 
     template<>
@@ -252,7 +252,7 @@ namespace lcv
     template<>
     int32 inline saturate_cast<int32>(uint32 v)
     {
-        return clip<int32, uint32, uint32>(v, (uint32)INT32_MAX);
+        return clip<int32, uint32, uint32>(v, INT32_MAX);
     }
 
     template<>

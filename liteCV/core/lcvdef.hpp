@@ -1,8 +1,8 @@
 #pragma once
 #ifndef LCV_CORE_LCVDEF_HPP
 #define LCV_CORE_LCVDEF_HPP
-#include <stdint.h>
-#include <assert.h>
+#include <cstdint>
+#include <cassert>
 
 
 // OpenMP declaration macro
@@ -45,23 +45,16 @@ namespace lcv
     public:
         Noncopyable() = default;
     }; // class Noncopyable
-
-    // Premitive types
-    using byte = uint8_t;
-    using int8 = int8_t;
-    using uint8 = uint8_t;
-    using int16 = int16_t;
-    using uint16 = uint16_t;
-    using int32 = int32_t;
-    using uint32 = uint32_t;
-    using int64 = int64_t;
-    using uint64 = uint64_t;
-    using float32 = float;
-    using float64 = double;
 } // namespace lcv
 
 
-// OpenCV's premitive types
+// Premitive types
+using schar = int8_t;
 using uchar = uint8_t;
 using ushort = uint16_t;
+using uint = uint32_t;
+using int64 = int64_t;
+using uint64 = uint64_t;
+using float32 = float;
+using float64 = double;
 #endif // LCV_CORE_LCVDEF_HPP

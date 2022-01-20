@@ -55,10 +55,10 @@ namespace lcv
 {
     struct MatrixType
     {
-        const static uint8_t INVALID_NUMBER = 0b00;
-        const static uint8_t SIGNED_INTEGER_NUMBER = 0b01;
-        const static uint8_t UNSIGNED_INTEGER_NUMBER = 0b10;
-        const static uint8_t REAL_NUMBER = 0b11;
+        const static int INVALID_NUMBER = 0b00;
+        const static int SIGNED_INTEGER_NUMBER = 0b01;
+        const static int UNSIGNED_INTEGER_NUMBER = 0b10;
+        const static int REAL_NUMBER = 0b11;
 
         static int find_ntype(int bits, char typec)
         {
@@ -169,19 +169,19 @@ namespace lcv
 
         union
         {
-            uint32_t value;
+            int value;
             struct
             {
-                uint32_t bits : 8;
-                uint32_t channels : 4;
-                uint32_t ntype : 2;
+                int bits : 8;
+                int channels : 4;
+                int ntype : 2;
             } fields;
         } packed;
 
-        MatrixType(uint32_t value = 0)
+        MatrixType(int value = 0)
             : packed({ value }) {}
 
-        MatrixType(uint8_t bits, uint8_t channels, uint8_t ntype)
+        MatrixType(int bits, int channels, int ntype)
             : packed({ 0 })
         {
             packed.fields.bits = bits;
@@ -232,7 +232,7 @@ namespace lcv
             return packed.fields.channels;
         }
 
-        uint32_t depth() const // Depth of element LCV_8U, LCV_8S, ...
+        int depth() const // Depth of element LCV_8U, LCV_8S, ...
         {
             MatrixType tmp(*this);
             tmp.packed.fields.channels = 0;
@@ -397,7 +397,7 @@ namespace lcv
             swallow_copy(another, roi, false);
         }
 
-        explicit Matrix(int cols, int rows, uint32_t type)
+        explicit Matrix(int cols, int rows, int type)
         {
             init();
             create(cols, rows, type);
@@ -409,7 +409,7 @@ namespace lcv
             create(cols, rows, channel_string);
         }
 
-        explicit Matrix(int cols, int rows, int channels, uint32_t type_wo_channels)
+        explicit Matrix(int cols, int rows, int channels, int type_wo_channels)
         {
             init();
             create(cols, rows, channels, type_wo_channels);
@@ -475,7 +475,7 @@ namespace lcv
         }
 
     public:
-        static Matrix zeros(int cols, int rows, uint32_t type)
+        static Matrix zeros(int cols, int rows, int type)
         {
             Matrix m(cols, rows, type);
             memset(m.ptr(), 0, m.rows * m.step_info.linestep);
@@ -489,7 +489,7 @@ namespace lcv
             return m;
         }
 
-        static Matrix zeros(int cols, int rows, int channels, uint32_t type_wo_channels)
+        static Matrix zeros(int cols, int rows, int channels, int type_wo_channels)
         {
             Matrix m(cols, rows, channels, type_wo_channels);
             memset(m.ptr(), 0, m.rows * m.step_info.linestep);
@@ -504,7 +504,7 @@ namespace lcv
         }
 
     public:
-        void create(int cols, int rows, uint32_t type)
+        void create(int cols, int rows, int type)
         {
             // Create matrix by type
             create(cols, rows, MatrixType(type));
@@ -516,7 +516,7 @@ namespace lcv
             create(cols, rows, MatrixType(channel_string));
         }
 
-        void create(int cols, int rows, int channels, uint32_t type_wo_channels)
+        void create(int cols, int rows, int channels, int type_wo_channels)
         {
             // Create matrix by type with channels
             MatrixType mt(type_wo_channels);
@@ -586,7 +586,7 @@ namespace lcv
             return type_info.dtype();
         }
 
-        uint32_t type() const
+        int type() const
         {
             return type_info.packed.value;
         }
