@@ -1,5 +1,5 @@
 # liteCV
-**_liteCV_** is lightweight image processing library for C++11.  
+**_liteCV_** is lightweight image processing library for C++14 (not ~~C++11~~).  
 Unlike _OpenCV_, **_liteCV_** must be **PORTABLE**.  
 Unlike _OpenCV_, **_liteCV_** must be **INDEPENDENCE**.
 Unlike _OpenCV_, **_liteCV_** must be **EASY-TO-USE**.
