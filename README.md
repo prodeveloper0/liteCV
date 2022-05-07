@@ -4,6 +4,11 @@ Unlike _OpenCV_, **_liteCV_** must be **PORTABLE**.
 Unlike _OpenCV_, **_liteCV_** must be **INDEPENDENCE**.
 Unlike _OpenCV_, **_liteCV_** must be **EASY-TO-USE**.
 
+# Compatible Compilers
+MSVC++ 14.2x is current main compiler as a reference fo testing. another compilers will be supported and tested later.
+
+* MSVC++ 14.2x (Visual Studio 2019) (Reference)
+
 # Achievements
 The main achievement of *_liteCV_* is providing equivalence with OpenCV.  
 Especially, we are focusing implementing OpenCV's `core`, `imgcodec`, `imgproc` and `highgui`.
