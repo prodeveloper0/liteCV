@@ -1,6 +1,6 @@
 #pragma once
-#ifndef LCV_CORE_MATH_HPP
-#define LCV_CORE_MATH_HPP
+#ifndef LCV_CORE_LCVMATH_HPP
+#define LCV_CORE_LCVMATH_HPP
 #include "lcvdef.hpp"
 
 
@@ -30,4 +30,4 @@ namespace lcv
         return (int)v + (((int)v < v) ? 1 : 0);
     } // lcvCeil
 } // namespace lcv
-#endif // LCV_CORE_MATH_HPP
+#endif // LCV_CORE_LCVMATH_HPP

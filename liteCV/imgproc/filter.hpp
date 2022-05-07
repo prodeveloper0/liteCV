@@ -1,10 +1,10 @@
 #pragma once
 #ifndef LCV_IMGPROC_FILTER_HPP
 #include "liteCV/core/lcvdef.hpp"
-#include "liteCV/core/matrix.hpp"
-#include "liteCV/core/types.hpp"
-#include "liteCV/core/math.hpp"
+#include "liteCV/core/lcvmath.hpp"
+#include "liteCV/core/lcvtypes.hpp"
 #include "liteCV/core/saturate.hpp"
+#include "liteCV/core/matrix.hpp"
 
 #include "border.hpp"
 
