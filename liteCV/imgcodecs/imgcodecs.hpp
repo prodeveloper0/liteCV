@@ -4,7 +4,18 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+
+#if __cplusplus >= 201703L
+// Over C++17
 #include <filesystem>
+namespace fs = std::filesystem;
+#else
+// In C++14
+#define _SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING
+#include <experimental/filesystem>
+namespace fs = std::experimental::filesystem;
+#endif
+
 
 #include "liteCV/core/lcvdef.hpp"
 #include "liteCV/core/matrix.hpp"
@@ -80,8 +91,8 @@ namespace lcv
 
         Matrix _img;
 
-        // `std::filesystem` only can use in C++17 :(
-        const std::filesystem::path path = filename;
+        // `std::filesystem` can be used in C++14 or higher :)
+        const fs::path path = filename;
 
         // Get image file extension from file name to encode image
         std::string extension = path.extension().string();
