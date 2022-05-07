@@ -4,7 +4,7 @@
 #include <utility>
 
 #include "lcvdef.hpp"
-#include "math.hpp"
+#include "lcvmath.hpp"
 
 
 namespace lcv
@@ -22,37 +22,37 @@ namespace lcv
     }
 
     template<typename T>
-    T inline saturate_cast(uint8 v)
+    T inline saturate_cast(uchar v)
     {
         return T(v);
     }
 
     template<typename T>
-    T inline saturate_cast(int8 v)
+    T inline saturate_cast(schar v)
     {
         return T(v);
     }
 
     template<typename T>
-    T inline saturate_cast(uint16 v)
+    T inline saturate_cast(ushort v)
     {
         return T(v);
     }
 
     template<typename T>
-    T inline saturate_cast(int16 v)
+    T inline saturate_cast(short v)
     {
         return T(v);
     }
 
     template<typename T>
-    T inline saturate_cast(uint32 v)
+    T inline saturate_cast(uint v)
     {
         return T(v);
     }
 
     template<typename T>
-    T inline saturate_cast(int32 v)
+    T inline saturate_cast(int v)
     {
         return T(v);
     }
@@ -70,199 +70,199 @@ namespace lcv
     }
 
     template<>
-    uint8 inline saturate_cast<uint8>(int8 v)
+    uchar inline saturate_cast<uchar>(schar v)
     {
-        return clip<uint8, int8, int32>(v, UINT8_MAX, 0);
+        return clip<uchar, schar, int>(v, UINT8_MAX, 0);
     }
 
     template<>
-    uint8 inline saturate_cast<uint8>(uint16 v)
+    uchar inline saturate_cast<uchar>(ushort v)
     {
-        return clip<uint8, uint16, uint32>(v, UINT8_MAX);
+        return clip<uchar, ushort, uint>(v, UINT8_MAX);
     }
 
     template<>
-    uint8 inline saturate_cast<uint8>(int16 v)
+    uchar inline saturate_cast<uchar>(short v)
     {
-        return clip<uint8, int16, int32>(v, UINT8_MAX, 0);
+        return clip<uchar, short, int>(v, UINT8_MAX, 0);
     }
 
     template<>
-    uint8 inline saturate_cast<uint8>(uint32 v)
+    uchar inline saturate_cast<uchar>(uint v)
     {
-        return clip<uint8, uint32, uint32>(v, UINT8_MAX);
+        return clip<uchar, uint, uint>(v, UINT8_MAX);
     }
 
     template<>
-    uint8 inline saturate_cast<uint8>(int32 v)
+    uchar inline saturate_cast<uchar>(int v)
     {
-        return clip<uint8, int32, int32>(v, UINT8_MAX, 0);
+        return clip<uchar, int, int>(v, UINT8_MAX, 0);
     }
 
     template<>
-    uint8 inline saturate_cast<uint8>(float32 v)
+    uchar inline saturate_cast<uchar>(float32 v)
     {
-        return saturate_cast<uint8>(lcvRound(v));
+        return saturate_cast<uchar>(lcvRound(v));
     }
 
     template<>
-    uint8 inline saturate_cast<uint8>(float64 v)
+    uchar inline saturate_cast<uchar>(float64 v)
     {
-        return saturate_cast<uint8>(lcvRound(v));
+        return saturate_cast<uchar>(lcvRound(v));
     }
 
     template<>
-    int8 inline saturate_cast<int8>(uint8 v)
+    schar inline saturate_cast<schar>(uchar v)
     {
-        return clip<int8, uint8, uint32>(v, INT8_MAX);
+        return clip<schar, uchar, uint>(v, INT8_MAX);
     }
 
     template<>
-    int8 inline saturate_cast<int8>(uint16 v)
+    schar inline saturate_cast<schar>(ushort v)
     {
-        return clip<int8, uint16, uint32>(v, INT8_MAX);
+        return clip<schar, ushort, uint>(v, INT8_MAX);
     }
 
     template<>
-    int8 inline saturate_cast<int8>(int16 v)
+    schar inline saturate_cast<schar>(short v)
     {
-        return clip<int8, int16, int32>(v, INT8_MAX, INT8_MIN);
+        return clip<schar, short, int>(v, INT8_MAX, INT8_MIN);
     }
 
     template<>
-    int8 inline saturate_cast<int8>(uint32 v)
+    schar inline saturate_cast<schar>(uint v)
     {
-        return clip<int8, uint32, uint32>(v, INT8_MAX);
+        return clip<schar, uint, uint>(v, INT8_MAX);
     }
 
     template<>
-    int8 inline saturate_cast<int8>(int32 v)
+    schar inline saturate_cast<schar>(int v)
     {
-        return clip<int8, int32, int32>(v, INT8_MAX, INT8_MIN);
+        return clip<schar, int, int>(v, INT8_MAX, INT8_MIN);
     }
 
     template<>
-    int8 inline saturate_cast<int8>(float32 v)
+    schar inline saturate_cast<schar>(float32 v)
     {
-        return saturate_cast<int8>(lcvRound(v));
+        return saturate_cast<schar>(lcvRound(v));
     }
 
     template<>
-    int8 inline saturate_cast<int8>(float64 v)
+    schar inline saturate_cast<schar>(float64 v)
     {
-        return saturate_cast<int8>(lcvRound(v));
+        return saturate_cast<schar>(lcvRound(v));
     }
 
     template<>
-    uint16 inline saturate_cast<uint16>(int8 v)
+    ushort inline saturate_cast<ushort>(schar v)
     {
-        return clip<uint16, int8, int32>(v, UINT16_MAX, 0);
+        return clip<ushort, schar, int>(v, UINT16_MAX, 0);
     }
 
     template<>
-    uint16 inline saturate_cast<uint16>(int16 v)
+    ushort inline saturate_cast<ushort>(short v)
     {
-        return clip<uint16, int16, int32>(v, UINT16_MAX, 0);
+        return clip<ushort, short, int>(v, UINT16_MAX, 0);
     }
 
     template<>
-    uint16 inline saturate_cast<uint16>(uint32 v)
+    ushort inline saturate_cast<ushort>(uint v)
     {
-        return clip<uint16, uint32, uint32>(v, UINT16_MAX);
+        return clip<ushort, uint, uint>(v, UINT16_MAX);
     }
 
     template<>
-    uint16 inline saturate_cast<uint16>(int32 v)
+    ushort inline saturate_cast<ushort>(int v)
     {
-        return clip<uint16, int32, int32>(v, UINT16_MAX, 0);
+        return clip<ushort, int, int>(v, UINT16_MAX, 0);
     }
 
     template<>
-    uint16 inline saturate_cast<uint16>(float32 v)
+    ushort inline saturate_cast<ushort>(float32 v)
     {
-        return saturate_cast<uint16>(lcvRound(v));
+        return saturate_cast<ushort>(lcvRound(v));
     }
 
     template<>
-    uint16 inline saturate_cast<uint16>(float64 v)
+    ushort inline saturate_cast<ushort>(float64 v)
     {
-        return saturate_cast<uint16>(lcvRound(v));
+        return saturate_cast<ushort>(lcvRound(v));
     }
 
     template<>
-    int16 inline saturate_cast<int16>(uint16 v)
+    short inline saturate_cast<short>(ushort v)
     {
-        return clip<int16, uint16, uint32>(v, INT16_MAX);
+        return clip<short, ushort, uint>(v, INT16_MAX);
     }
 
     template<>
-    int16 inline saturate_cast<int16>(uint32 v)
+    short inline saturate_cast<short>(uint v)
     {
-        return clip<int16, uint32, uint32>(v, INT16_MAX);
+        return clip<short, uint, uint>(v, INT16_MAX);
     }
 
     template<>
-    int16 inline saturate_cast<int16>(int32 v)
+    short inline saturate_cast<short>(int v)
     {
-        return clip<int16, int32, int32>(v, INT16_MAX, INT16_MIN);
+        return clip<short, int, int>(v, INT16_MAX, INT16_MIN);
     }
 
     template<>
-    int16 inline saturate_cast<int16>(float32 v)
+    short inline saturate_cast<short>(float32 v)
     {
-        return saturate_cast<int16>(lcvRound(v));
+        return saturate_cast<short>(lcvRound(v));
     }
 
     template<>
-    int16 inline saturate_cast<int16>(float64 v)
+    short inline saturate_cast<short>(float64 v)
     {
-        return saturate_cast<int16>(lcvRound(v));
+        return saturate_cast<short>(lcvRound(v));
     }
 
     template<>
-    uint32 inline saturate_cast<uint32>(int8 v)
+    uint inline saturate_cast<uint>(schar v)
     {
-        return (uint32)clip<uint32, int8, int8>(v, INT8_MAX, 0);
+        return (uint)clip<uint, schar, schar>(v, INT8_MAX, 0);
     }
 
     template<>
-    uint32 inline saturate_cast<uint32>(int16 v)
+    uint inline saturate_cast<uint>(short v)
     {
-        return (uint32)clip<uint32, int16, int16>(v, INT16_MAX, 0);
+        return (uint)clip<uint, short, short>(v, INT16_MAX, 0);
     }
 
     template<>
-    uint32 inline saturate_cast<uint32>(int32 v)
+    uint inline saturate_cast<uint>(int v)
     {
-        return (uint32)clip<uint32, int32, int32>(v, INT32_MAX, 0);
+        return (uint)clip<uint, int, int>(v, INT32_MAX, 0);
     }
 
     template<>
-    uint32 inline saturate_cast<uint32>(float32 v)
+    uint inline saturate_cast<uint>(float32 v)
     {
-        return (uint32)lcvRound(v);
+        return (uint)lcvRound(v);
     }
 
     template<>
-    uint32 inline saturate_cast<uint32>(float64 v)
+    uint inline saturate_cast<uint>(float64 v)
     {
-        return (uint32)lcvRound(v);
+        return (uint)lcvRound(v);
     }
 
     template<>
-    int32 inline saturate_cast<int32>(uint32 v)
+    int inline saturate_cast<int>(uint v)
     {
-        return clip<int32, uint32, uint32>(v, INT32_MAX);
+        return clip<int, uint, uint>(v, INT32_MAX);
     }
 
     template<>
-    int32 inline saturate_cast<int32>(float32 v)
+    int inline saturate_cast<int>(float32 v)
     {
         return lcvRound(v);
     }
 
     template<>
-    int32 inline saturate_cast<int32>(float64 v)
+    int inline saturate_cast<int>(float64 v)
     {
         return lcvRound(v);
     }

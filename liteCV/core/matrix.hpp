@@ -6,7 +6,7 @@
 #include <regex>
 
 #include "lcvdef.hpp"
-#include "types.hpp"
+#include "lcvtypes.hpp"
 
 
 #define LCV_8U      (lcv::ConstMatrixType<8, 0, lcv::MatrixType::UNSIGNED_INTEGER_NUMBER>().constant.packed.value)
@@ -283,10 +283,10 @@ namespace lcv
 
         MatrixType type_info;
 
-        byte* data;
-        byte* datastart;
-        byte* dataend;
-        byte* datalimit;
+        uchar* data;
+        uchar* datastart;
+        uchar* dataend;
+        uchar* datalimit;
 
     private:
         std::atomic<unsigned long>* refcount;
@@ -367,7 +367,7 @@ namespace lcv
             this->step_info = another.step_info;
             this->type_info = another.type_info;
             this->refcount = another.refcount;
-            this->data = (byte*)another.ptr(roi.y, roi.x);
+            this->data = (uchar*)another.ptr(roi.y, roi.x);
             this->datastart = another.datastart;
             this->dataend = another.dataend;
             this->datalimit = another.datalimit;
@@ -454,9 +454,9 @@ namespace lcv
             int scanline_bytes = cols * pixel_bytes;
 
             // Allocate memory first
-            byte* datastart;
-            byte* dataend;
-            if ((datastart = (byte*)malloc(rows * scanline_bytes)) == NULL)
+            uchar* datastart;
+            uchar* dataend;
+            if ((datastart = (uchar*)malloc(rows * scanline_bytes)) == NULL)
                 throw std::bad_exception();
             dataend = datastart + (rows * scanline_bytes);
 
@@ -609,22 +609,22 @@ namespace lcv
         }
 
     public:
-        byte* ptr(int y=0)
+        uchar* ptr(int y=0)
         {
             return data + (step_info.linestep * y);
         }
 
-        const byte* ptr(int y=0) const
+        const uchar* ptr(int y=0) const
         {
             return data + (step_info.linestep * y);
         }
 
-        byte* ptr(int y, int x)
+        uchar* ptr(int y, int x)
         {
             return data + (step_info.linestep * y) + (step_info.pixelstep * x);
         }
 
-        const byte* ptr(int y, int x) const
+        const uchar* ptr(int y, int x) const
         {
             return data + (step_info.linestep * y) + (step_info.pixelstep * x);
         }

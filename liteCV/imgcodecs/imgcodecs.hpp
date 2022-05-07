@@ -111,7 +111,7 @@ namespace lcv
         return false;
     } // imwrite
 
-    Matrix imdecode(const std::vector<byte>& buffer, int flag = IMREAD_UNCHANGED)
+    Matrix imdecode(const std::vector<uchar>& buffer, int flag = IMREAD_UNCHANGED)
     {
         Matrix img;
         stbi_uc* data;
@@ -157,12 +157,12 @@ namespace lcv
         return img;
     } // imdecode
 
-    bool imencode(const std::string& ext, const Matrix& img, std::vector<byte>& buf, const std::vector<int>& params = std::vector<int>())
+    bool imencode(const std::string& ext, const Matrix& img, std::vector<uchar>& buf, const std::vector<int>& params = std::vector<int>())
     {
         // Only encode grayscale or color (3ch/4ch) image
         assert(img.channels() == 1 || img.channels() == 3 || img.channels() == 4);
 
-        std::vector<byte> encoded_buffer;
+        std::vector<uchar> encoded_buffer;
         Matrix _img;
 
         // Get image file extension from file name to encode image
@@ -172,8 +172,8 @@ namespace lcv
         // A callback extending the buffer by stb_image_write
         auto writer_functor = [](void* context, void* data, int size) -> void
         {
-            std::vector<byte>& encoded_buffer = *((std::vector<byte>*)context);
-            encoded_buffer.insert(encoded_buffer.end(), (byte*)data, (byte*)data + size);
+            std::vector<uchar>& encoded_buffer = *((std::vector<uchar>*)context);
+            encoded_buffer.insert(encoded_buffer.end(), (uchar*)data, (uchar*)data + size);
         };
 
         // Reserve memory

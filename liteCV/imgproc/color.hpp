@@ -79,11 +79,11 @@ namespace lcv
         for (int y = 0; y < src.rows; ++y)
         {
             const Vec3b* src_stride = (Vec3b*)src.ptr(y);
-            byte* dst_stride = dst_image.ptr(y);
+            uchar* dst_stride = dst_image.ptr(y);
 
             for (int x = 0; x < src.cols; ++x)
             {
-                dst_stride[x] = (byte)(((int)src_stride[x][0] + src_stride[x][1] + src_stride[x][2]) / 3);
+                dst_stride[x] = (uchar)(((int)src_stride[x][0] + src_stride[x][1] + src_stride[x][2]) / 3);
             }
         }
 
@@ -148,11 +148,11 @@ namespace lcv
         for (int y = 0; y < src.rows; ++y)
         {
             const Vec4b* src_stride = (Vec4b*)src.ptr(y);
-            byte* dst_stride = (byte*)dst_image.ptr(y);
+            uchar* dst_stride = (uchar*)dst_image.ptr(y);
 
             for (int x = 0; x < src.cols; ++x)
             {
-                dst_stride[x] = (byte)(((int)src_stride[x][0] + src_stride[x][1] + src_stride[x][2]) / 3);
+                dst_stride[x] = (uchar)(((int)src_stride[x][0] + src_stride[x][1] + src_stride[x][2]) / 3);
             }
         }
 
@@ -171,7 +171,7 @@ namespace lcv
         LCV_OMP_LOOP_FOR
         for (int y = 0; y < src.rows; ++y)
         {
-            const byte* src_stride = src.ptr(y);
+            const uchar* src_stride = src.ptr(y);
             Vec3b* dst_stride = (Vec3b*)dst_image.ptr(y);
 
             for (int x = 0; x < src.cols; ++x)
@@ -193,7 +193,7 @@ namespace lcv
         LCV_OMP_LOOP_FOR
         for (int y = 0; y < src.rows; ++y)
         {
-            const byte* src_stride = src.ptr(y);
+            const uchar* src_stride = src.ptr(y);
             Vec4b* dst_stride = (Vec4b*)dst_image.ptr(y);
 
             for (int x = 0; x < src.cols; ++x)
