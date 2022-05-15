@@ -24,14 +24,29 @@ namespace lcv
         {
             int bpp, width, height;
             bpp = mat.elemSize() * 8;
-            width = mat.cols;
+            width = (mat.cols % 2) ? (mat.cols + 1) : mat.cols; // SetDIBitsToDevice requires DWORD aligned
             height = mat.rows;
 
             create(bpp, width, height);
 
             Matrix m;
             mat.copyTo(m);
-            memcpy(pdata, m.data, width * height * ((int)bpp / 8));
+
+            if (width != mat.cols)
+            {
+                // stride was not aligned by default
+                for (int y = 0; y < height; ++y)
+                {
+                    // copy pixels stride by stride
+                    const int offset = width * ((int)bpp / 8);
+                    memcpy(&pdata[offset * y], m.ptr(y), offset);
+                }
+            }
+            else
+            {
+                // stride was aligned by default
+                memcpy(pdata, m.data, width * height * ((int)bpp / 8));
+            }
         }
         
     public:
@@ -159,6 +174,7 @@ namespace lcv
             return (*pbmi).bmiHeader.biBitCount;
         }
 
+        // width could be different because padding was added
         int inline Width() const
         {
             return (*pbmi).bmiHeader.biWidth;
