@@ -26,11 +26,11 @@ namespace lcv
 
         Matrix output(src.cols, src.rows, src.type());
 
-        // Loop width
+        // Loop height
         LCV_OMP_LOOP_FOR
         for (int y = 0; y < output.rows; ++y)
         {
-            // Loop height
+            // Loop width
             for (int x = 0; x < output.cols; ++x)
             {
                 // Loop channel
@@ -54,8 +54,8 @@ namespace lcv
 
                     output.ptr<uchar>(y, x)[ch] = saturate_cast<uchar>(sum + delta);
                 } // Channel
-            } // Height 
-        } // Width
+            } // Width 
+        } // Height
 
         dst = output;
     } // filter2D
