@@ -11,31 +11,18 @@
 
 namespace lcv
 {
-    void resize(const Matrix& src, Matrix& dst, Size dsize, double fx = 0, double fy = 0, int interpolation = INTER_NEAREST)
+    void resize(const Matrix& src, Matrix& dst, Size dsize, double fx = 0, double fy = 0, int interpolation = INTER_LINEAR)
     {
-        // Only support nearest neighborhood interpolation yet
-        assert(interpolation == INTER_NEAREST);
-
         // Only support 8-bits depth image
         assert(src.depth() == LCV_8U);
 
+        // both dsize and fx|fy cannot be zero
+        assert(dsize.area() == 0 && (fx == 0 || fy == 0));
+
         const int width = src.cols;
         const int height = src.rows;
-        int scaled_width;
-        int scaled_height;
-
-        if (dsize.area()) 
-        {
-            // dsize is not zero
-            scaled_width = dsize.width;
-            scaled_height = dsize.height;
-        }
-        else
-        {
-            // dsize is zero, use scale factors(fx/fy)
-            scaled_width = lcvRound(width * fx);
-            scaled_height = lcvRound(height * fy);
-        }
+        int scaled_width = dsize.width ? dsize.width : lcvRound(width * fx);
+        int scaled_height = dsize.height ? dsize.height : lcvRound(height * fy);
 
         // scaled width and scaled height must not be zero
         assert(scaled_width * scaled_height != 0);
@@ -46,8 +33,6 @@ namespace lcv
         LCV_OMP_LOOP_FOR
         for (int y = 0; y < output.rows; ++y)
         {
-            const int forward_y = lcvRound(((float)y / scaled_height) * height);
-
             // Loop width
             for (int x = 0; x < output.cols; ++x)
             {
@@ -56,7 +41,8 @@ namespace lcv
                 // Loop channel
                 for (int ch = 0; ch < output.channels(); ++ch)
                 {
-                    output.ptr<uchar>(y, x)[ch] = src.ptr<uchar>(forward_y, forward_x)[ch];
+                    InterpolationPolicy* ip = InterpolationPolicyStorage::get_policy(interpolation);
+                    output.ptr<uchar>(y, x)[ch] = saturate_cast<uchar>(ip->interpolate(src, scaled_width, scaled_height, x, y, ch));
                 } // Channel
             } // Width
         } // Height
